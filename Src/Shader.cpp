@@ -15,7 +15,7 @@ namespace Shader {
 *
 * @return 作成したシェーダオブジェクト.
 */
-GLuint CompileShader(GLenum type, const GLchar* string)
+GLuint Compile(GLenum type, const GLchar* string)
 {
   GLuint shader = glCreateShader(type);
   glShaderSource(shader, 1, &string, nullptr);
@@ -47,10 +47,10 @@ GLuint CompileShader(GLenum type, const GLchar* string)
 *
 * @return 作成したプログラムオブジェクト.
 */
-GLuint CreateShaderProgram(const GLchar* vsCode, const GLchar* fsCode)
+GLuint CreateProgram(const GLchar* vsCode, const GLchar* fsCode)
 {
-  GLuint vs = CompileShader(GL_VERTEX_SHADER, vsCode);
-  GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fsCode);
+  GLuint vs = Compile(GL_VERTEX_SHADER, vsCode);
+  GLuint fs = Compile(GL_FRAGMENT_SHADER, fsCode);
   if (!vs || !fs) {
     return 0;
   }

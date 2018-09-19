@@ -7,7 +7,7 @@
 
 namespace Shader {
 
-GLuint CreateShaderProgram(const GLchar* vsCode, const GLchar* fsCode);
+GLuint CreateProgram(const GLchar* vsCode, const GLchar* fsCode);
 
 } // namespace Shader
 
