@@ -47,7 +47,7 @@ GLuint Compile(GLenum type, const GLchar* string)
 *
 * @return 作成したプログラムオブジェクト.
 */
-GLuint CreateProgram(const GLchar* vsCode, const GLchar* fsCode)
+GLuint Build(const GLchar* vsCode, const GLchar* fsCode)
 {
   GLuint vs = Compile(GL_VERTEX_SHADER, vsCode);
   GLuint fs = Compile(GL_FRAGMENT_SHADER, fsCode);

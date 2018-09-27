@@ -103,7 +103,7 @@ int main()
 
   const GLuint vbo = CreateVBO(sizeof(vertices), vertices);
   const GLuint vao = CreateVAO(vbo);
-  const GLuint shaderProgram = Shader::CreateProgram(vsCode, fsCode);
+  const GLuint shaderProgram = Shader::Build(vsCode, fsCode);
   if (!vbo || !vao || !shaderProgram) {
     return 1;
   }
