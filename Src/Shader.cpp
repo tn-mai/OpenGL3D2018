@@ -30,7 +30,7 @@ GLuint Compile(GLenum type, const GLchar* string)
       buf.resize(infoLen);
       if (static_cast<int>(buf.size()) >= infoLen) {
         glGetShaderInfoLog(shader, infoLen, NULL, buf.data());
-        std::cerr << "ERROR: シェーダのコンパイルに失敗￥n" << buf.data() << std::endl;
+        std::cerr << "ERROR: シェーダのコンパイルに失敗\n" << buf.data() << std::endl;
       }
     }
     glDeleteShader(shader);
@@ -70,7 +70,7 @@ GLuint CreateProgram(const GLchar* vsCode, const GLchar* fsCode)
       buf.resize(infoLen);
       if (static_cast<int>(buf.size()) >= infoLen) {
         glGetProgramInfoLog(program, infoLen, NULL, buf.data());
-        std::cerr << "ERROR: シェーダのリンクに失敗￥n" << buf.data() << std::endl;
+        std::cerr << "ERROR: シェーダのリンクに失敗\n" << buf.data() << std::endl;
       }
     }
     glDeleteProgram(program);
