@@ -3,6 +3,7 @@
 */
 #include "GLFWEW.h"
 #include "Shader.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <vector>
 
@@ -27,17 +28,35 @@ struct Vertex
 
 /// 頂点データ.
 const Vertex vertices[] = {
-  { {-0.5f, -0.3f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f} },
-  { { 0.3f, -0.3f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f} },
-  { { 0.3f,  0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f} },
-  { {-0.5f,  0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f} },
+  // 木
+  { { 0.00f, 5.0f, 0.00f}, {0.5f, 0.8f, 0.3f, 1.0f} },
+  { { 0.00f, 1.5f,-1.10f}, {0.1f, 0.3f, 0.0f, 1.0f} },
+  { {-0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f} },
+  { { 0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f} },
+  { { 0.00f, 4.0f, 0.00f}, {0.2f, 0.1f, 0.0f, 1.0f} },
+  { { 0.00f, 0.0f,-0.37f}, {0.5f, 0.3f, 0.2f, 1.0f} },
+  { {-0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f} },
+  { { 0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f} },
 
-  { {-0.3f,  0.3f, 0.1f}, {0.0f, 0.0f, 1.0f, 1.0f} },
-  { {-0.3f, -0.5f, 0.1f}, {0.0f, 1.0f, 1.0f, 1.0f} },
-  { { 0.5f, -0.5f, 0.1f}, {0.0f, 0.0f, 1.0f, 1.0f} },
-  { { 0.5f, -0.5f, 0.1f}, {1.0f, 0.0f, 0.0f, 1.0f} },
-  { { 0.5f,  0.3f, 0.1f}, {1.0f, 1.0f, 0.0f, 1.0f} },
-  { {-0.3f,  0.3f, 0.1f}, {1.0f, 0.0f, 0.0f, 1.0f} },
+  // 家
+  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f} },
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f} },
+  { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f} },
+  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f} },
+  { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f} },
+
+  { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f} },
+  { {-3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f} },
+  { { 0.0f, 6.0f,-3.0f}, {0.5f, 0.4f, 0.2f, 1.0f} },
+  { { 3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f} },
+  { { 2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f} },
+
+  { { 3.0f, 4.0f, 3.0f}, {0.2f, 0.1f, 0.1f, 1.0f} },
+  { { 0.0f, 6.0f, 3.0f}, {0.3f, 0.2f, 0.2f, 1.0f} },
+  { {-3.0f, 4.0f, 3.0f}, {0.2f, 0.1f, 0.1f, 1.0f} },
+  { {-3.0f, 4.0f,-3.0f}, {0.2f, 0.1f, 0.1f, 1.0f} },
+  { { 0.0f, 6.0f,-3.0f}, {0.3f, 0.2f, 0.2f, 1.0f} },
+  { { 3.0f, 4.0f,-3.0f}, {0.2f, 0.1f, 0.1f, 1.0f} },
 
   { {-0.25f,  0.0f, 0.5f}, {0.0f, 1.0f, 1.0f, 1.0f} },
   { { 0.25f,  0.0f, 0.5f}, {1.0f, 1.0f, 0.0f, 1.0f} },
@@ -54,9 +73,44 @@ const Vertex vertices[] = {
 
 /// インデックスデータ.
 const GLushort indices[] = {
+  // 木
+  0, 1, 2, 0, 2, 3, 0, 3, 1, 1, 2, 3,
+  4, 5, 6, 4, 6, 7, 4, 7, 5,
+
+  // 家
+  0, 1, 3, 3, 4, 0, 1, 2, 3,
+  5, 6, 8, 8, 9, 5, 6, 7, 8,
+  9, 8, 1, 1, 0, 9,
+  4, 3, 6, 6, 5, 4,
+  15, 14, 11, 11, 10, 15,
+  12, 11, 14, 14, 13, 12,
+
+  12, 13, 16, 13, 14, 16, 14, 15, 16, 15, 12, 16,
+  13, 12, 17, 14, 13, 17, 15, 14, 17, 12, 15, 17,
+
   0, 1, 2, 2, 3, 0,
   4, 5, 6, 7, 8, 9,
 };
+
+/**
+* ポリゴン表示単位.
+*/
+struct Mesh
+{
+  GLenum mode; ///< プリミティブの種類.
+  GLsizei count; ///< 描画するインデックス数.
+  const GLvoid* indices; ///< 描画開始インデックスのバイトオフセット.
+  GLint baseVertex; ///< インデックス0とみなされる頂点配列内の位置.
+};
+
+/**
+* メッシュ配列.
+*/
+const Mesh meshList[] = {
+  { GL_TRIANGLES, 3 * 7, (const GLvoid*)0, 0 },
+  { GL_TRIANGLES, 3 * 14, (const GLvoid*)(3 * 7 * sizeof(indices[0])), 8 },
+};
+
 
 /// 頂点シェーダ.
 static const char* vsCode =
@@ -64,9 +118,10 @@ static const char* vsCode =
 "layout(location=0) in vec3 vPosition; \n"
 "layout(location=1) in vec4 vColor; \n"
 "layout(location=0) out vec4 outColor; \n"
+"uniform mat4x4 matMVP; \n"
 "void main() { \n"
 "  outColor = vColor; \n"
-"  gl_Position = vec4(vPosition, 1.0); \n"
+"  gl_Position = matMVP * vec4(vPosition, 1.0); \n"
 "} \n";
 
 /// フラグメントシェーダ.
@@ -156,15 +211,50 @@ int main()
     return 1;
   }
 
+  // uniform変数の位置を取得.
+  const GLint matMVPLoc = glGetUniformLocation(shaderProgram, "matMVP");
+  if (matMVPLoc < 0) {
+    std::cerr << "ERROR: uniform変数'matMVP'の位置を取得できません.\n";
+    return 1;
+  }
+
   // メインループ.
   while (!window.ShouldClose()) {
+    glEnable(GL_DEPTH_TEST);
+
     glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // 視点を回転移動させる.
+    static float degree = 0.0f;
+    degree += 0.1f;
+    if (degree >= 360.0f) { degree -= 360.0f; }
+    const glm::vec3 viewPos = glm::rotate(glm::mat4(1), glm::radians(degree), glm::vec3(0, 1, 0)) * glm::vec4(-20, 30, -30, 1);
+
     glUseProgram(shaderProgram);
+
+    // 座標変換行列を作成する.
+    const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
+    const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES,
-      sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_SHORT, (const GLvoid*)0);
+
+    const float treeCount = 10;
+    for (float i = 0; i < treeCount; ++i) {
+      const float x = std::cos(3.14f * 2 / treeCount * i) * 8;
+      const float z = std::sin(3.14f * 2 / treeCount * i) * 8;
+      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(x, 0, z));
+      const glm::mat4x4 matMVP = matProj * matView * matModel;
+      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
+      glDrawElementsBaseVertex(meshList[0].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
+    }
+
+    {
+      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+      const glm::mat4x4 matMVP = matProj * matView * matModel;
+      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
+      glDrawElementsBaseVertex(meshList[1].mode, meshList[1].count, GL_UNSIGNED_SHORT, meshList[1].indices, meshList[1].baseVertex);
+    }
 
     window.SwapBuffers();
   }
