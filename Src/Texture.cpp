@@ -17,7 +17,7 @@ namespace Texture {
 * @retval 0以外  作成したテクスチャ・オブジェクトのID.
 * @retval 0      テクスチャの作成に失敗.
 */
-GLuint CreateImage2D(GLsizei width, GLsizei height, const void* data)
+GLuint CreateImage2D(GLsizei width, GLsizei height, const GLvoid* data)
 {
   GLuint id;
   glGenTextures(1, &id);
