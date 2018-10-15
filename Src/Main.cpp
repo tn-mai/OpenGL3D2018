@@ -47,26 +47,29 @@ const Vertex vertices[] = {
   { { 0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f} },
 
   // â∆
-  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, {-2.0f,-2.0f } },
-  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, {-2.0f, 0.8f } },
-  { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.0f, 2.0f } },
-  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 2.0f, 0.8f } },
-  { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 2.0f,-2.0f } },
+  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.0f, 1.0f } },
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.0f, 0.31f } },
+  { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.125f, 0.0f } },
+  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.25f, 0.31f } },
+  { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.25f, 1.0f } },
 
-  { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, {-2.0f,-2.0f } },
-  { {-3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, {-2.0f, 0.8f } },
-  { { 0.0f, 6.0f,-3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.0f, 2.0f } },
-  { { 3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 2.0f, 0.8f } },
-  { { 2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 2.0f,-2.0f } },
+  { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.5f, 1.0f } },
+  { {-3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.5f, 0.31f } },
+  { { 0.0f, 6.0f,-3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.625f, 0.0f } },
+  { { 3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.75f, 0.31f } },
+  { { 2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.75f, 1.0f } },
 
-  { { 3.0f, 4.0f, 3.0f}, {0.2f, 0.1f, 0.1f, 1.0f}, {-2.0f,-2.0f } },
-  { { 0.0f, 6.0f, 3.0f}, {0.3f, 0.2f, 0.2f, 1.0f}, { 0.0f,-2.0f } },
-  { {-3.0f, 4.0f, 3.0f}, {0.2f, 0.1f, 0.1f, 1.0f}, { 2.0f,-2.0f } },
-  { {-3.0f, 4.0f,-3.0f}, {0.2f, 0.1f, 0.1f, 1.0f}, { 2.0f, 2.0f } },
-  { { 0.0f, 6.0f,-3.0f}, {0.3f, 0.2f, 0.2f, 1.0f}, { 0.0f, 2.0f } },
-  { { 3.0f, 4.0f,-3.0f}, {0.2f, 0.1f, 0.1f, 1.0f}, {-2.0f, 2.0f } },
+  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.0f, 1.0f } },
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.0f, 0.31f } },
 
-  // êŒ
+  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.25f, 0.0f } },
+  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.5f, 0.0f } },
+  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.75f, 0.0f } },
+  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
+
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 1.0f, 0.31f } },
+
+  // ä‚
   { { 0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.0f } },
   { { 0.4f, 0.5f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.5f } },
   { {-0.4f, 0.6f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.5f } },
@@ -100,10 +103,10 @@ const GLushort indices[] = {
   // â∆
   0, 1, 3, 3, 4, 0, 1, 2, 3,
   5, 6, 8, 8, 9, 5, 6, 7, 8,
-  9, 8, 1, 1, 0, 9,
+  9, 8, 11, 11, 10, 9,
   4, 3, 6, 6, 5, 4,
-  15, 14, 11, 11, 10, 15,
-  12, 11, 14, 14, 13, 12,
+  3, 12, 13, 13, 6, 3,
+  8, 14, 15, 15, 16, 8,
 
   // êŒ
   0, 1, 2, 2, 3, 0,
@@ -136,7 +139,7 @@ struct Mesh
 const Mesh meshList[] = {
   { GL_TRIANGLES, 3 * 7, (const GLvoid*)0, 0 },
   { GL_TRIANGLES, 3 * 14, (const GLvoid*)(21 * sizeof(indices[0])), 8 },
-  { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 24 },
+  { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 25 },
 };
 
 
@@ -274,11 +277,14 @@ int main()
     W, W, W, W, W, W, B, W,
     B, B, B, B, B, B, B, B,
   };
-  GLuint texId = Texture::CreateImage2D(tw, th, imageData);
+  GLuint texId = Texture::CreateImage2D(tw, th, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
+  GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
 
   // ÉÅÉCÉìÉãÅ[Év.
   while (!window.ShouldClose()) {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -311,12 +317,17 @@ int main()
     }
 
     {
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, texHouse);
+
       const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
       const glm::mat4x4 matMVP = matProj * matView * matModel;
       glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
       glDrawElementsBaseVertex(meshList[1].mode, meshList[1].count, GL_UNSIGNED_SHORT, meshList[1].indices, meshList[1].baseVertex);
     }
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texId);
     {
       const glm::mat4x4 matModel = glm::scale(glm::translate(glm::mat4(1), glm::vec3(4, 0, 0)), glm::vec3(1));
       const glm::mat4x4 matMVP = matProj * matView * matModel;
@@ -330,6 +341,7 @@ int main()
     window.SwapBuffers();
   }
 
+  glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
   glDeleteProgram(shaderProgram);
   glDeleteVertexArrays(1, &vao);

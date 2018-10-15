@@ -7,9 +7,9 @@
 
 namespace Texture {
 
-GLuint CreateImage2D(GLsizei width, GLsizei height, const GLvoid* data);
+GLuint CreateImage2D(GLsizei width, GLsizei height, const GLvoid* data, GLenum format, GLenum type);
+GLuint LoadImage2D(const char* path);
 
 } // namespace Texture
-
 
 #endif // TEXTURE_H_INCLUDED
