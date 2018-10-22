@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 namespace Shader {
 
@@ -17,6 +18,10 @@ namespace Shader {
 */
 GLuint Compile(GLenum type, const GLchar* string)
 {
+  if (!string) {
+    return 0;
+  }
+
   GLuint shader = glCreateShader(type);
   glShaderSource(shader, 1, &string, nullptr);
   glCompileShader(shader);
@@ -77,6 +82,45 @@ GLuint Build(const GLchar* vsCode, const GLchar* fsCode)
     return 0;
   }
   return program;
+}
+
+/**
+* ファイルを読み込む.
+*
+* @param path 読み込むファイル名.
+*
+* @return 読み込んだデータ.
+*/
+std::vector<GLchar> ReadFile(const char* path)
+{
+  std::basic_ifstream<GLchar> ifs;
+  ifs.open(path, std::ios_base::binary);
+  if (!ifs.is_open()) {
+    std::cerr << "ERROR: " << path << " を開けません\n";
+    return {};
+  }
+  ifs.seekg(0, std::ios_base::end);
+  const std::streamoff length = ifs.tellg();
+  ifs.seekg(0, std::ios_base::beg);
+  std::vector<GLchar> buf((size_t)length);
+  ifs.read(buf.data(), length);
+  buf.push_back('\0');
+  return buf;
+}
+
+/**
+* ファイルからプログラム・オブジェクトを作成する.
+*
+* @param vsPath 頂点シェーダーファイル名.
+* @param fsPath フラグメントシェーダーファイル名.
+*
+* @return 作成したプログラム・オブジェクト.
+*/
+GLuint BuildFromFile(const char* vsPath, const char* fsPath)
+{
+  const std::vector<GLchar> vsCode = ReadFile(vsPath);
+  const std::vector<GLchar> fsCode = ReadFile(fsPath);
+  return Build(vsCode.data(), fsCode.data());
 }
 
 } // namespace Shader

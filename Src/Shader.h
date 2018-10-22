@@ -8,6 +8,7 @@
 namespace Shader {
 
 GLuint Build(const GLchar* vsCode, const GLchar* fsCode);
+GLuint BuildFromFile(const char* vsPath, const char* fsPath);
 
 } // namespace Shader
 

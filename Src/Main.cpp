@@ -32,53 +32,52 @@ struct Vertex
   Vector3 position; ///< 座標
   Color color; ///< 色
   Vector2 texCoord; ///< テクスチャ座標.
+  Vector3 normal; ///< 法線.
 };
 
 /// 頂点データ.
 const Vertex vertices[] = {
   // 木
-  { { 0.00f, 5.0f, 0.00f}, {0.5f, 0.8f, 0.3f, 1.0f} },
-  { { 0.00f, 1.5f,-1.10f}, {0.1f, 0.3f, 0.0f, 1.0f} },
-  { {-0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f} },
-  { { 0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f} },
-  { { 0.00f, 4.0f, 0.00f}, {0.2f, 0.1f, 0.0f, 1.0f} },
-  { { 0.00f, 0.0f,-0.37f}, {0.5f, 0.3f, 0.2f, 1.0f} },
-  { {-0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f} },
-  { { 0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f} },
+  { { 0.00f, 5.0f, 0.00f}, {0.5f, 0.8f, 0.3f, 1.0f}, { 0.0f, 0.0f }, { 0.00f, 1.00f, 0.00f } },
+  { { 0.00f, 1.5f,-1.10f}, {0.1f, 0.3f, 0.0f, 1.0f}, { 0.0f, 0.0f }, { 0.00f,-0.49f,-0.87f } },
+  { {-0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f}, { 0.0f, 0.0f }, {-0.76f,-0.49f, 0.43f } },
+  { { 0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f}, { 0.0f, 0.0f }, { 0.76f,-0.49f, 0.43f } },
+  { { 0.00f, 4.0f, 0.00f}, {0.2f, 0.1f, 0.0f, 1.0f}, { 0.0f, 0.0f }, { 0.00f, 1.00f, 0.00f } },
+  { { 0.00f, 0.0f,-0.37f}, {0.5f, 0.3f, 0.2f, 1.0f}, { 0.0f, 0.0f }, { 0.00f,-0.49f,-0.87f } },
+  { {-0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f}, { 0.0f, 0.0f }, {-0.76f,-0.49f, 0.43f } },
+  { { 0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f}, { 0.0f, 0.0f }, { 0.76f,-0.49f, 0.43f } },
 
   // 家
-  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.0f, 1.0f } },
-  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.0f, 0.31f } },
-  { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.125f, 0.0f } },
-  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.25f, 0.31f } },
-  { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.25f, 1.0f } },
+  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.00f, 0.00f }, { 0.71f, 0.0f, 0.71f } },
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.00f, 0.69f }, { 0.71f, 0.0f, 0.71f } },
+  { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.125f, 1.0f }, { 0.00f, 0.0f, 1.00f } },
+  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.25f, 0.69f }, {-0.71f, 0.0f, 0.71f } },
+  { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.25f, 0.00f }, {-0.71f, 0.0f, 0.71f } },
 
-  { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.5f, 1.0f } },
-  { {-3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.5f, 0.31f } },
-  { { 0.0f, 6.0f,-3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.625f, 0.0f } },
-  { { 3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.75f, 0.31f } },
-  { { 2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.75f, 1.0f } },
+  { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.50f, 0.00f }, {-0.71f, 0.0f,-0.71f } },
+  { {-3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.50f, 0.69f }, {-0.71f, 0.0f,-0.71f } },
+  { { 0.0f, 6.0f,-3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.625f, 1.0f }, { 0.00f, 0.0f,-1.00f } },
+  { { 3.0f, 4.0f,-3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.75f, 0.69f }, { 0.71f, 0.0f,-0.71f } },
+  { { 2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.75f, 0.00f }, { 0.71f, 0.0f,-0.71f } },
 
-  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.0f, 1.0f } },
-  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.0f, 0.31f } },
+  { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 1.00f, 0.00f }, { 0.71f, 0.0f, 0.71f } },
+  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 1.00f, 0.69f }, { 0.71f, 0.0f, 0.71f } },
 
-  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.25f, 0.0f } },
-  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.5f, 0.0f } },
-  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.75f, 0.0f } },
-  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f } },
-
-  { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 1.0f, 0.31f } },
+  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.25f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
+  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.50f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
+  { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.75f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
+  { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.00f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
 
   // 岩
-  { { 0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.0f } },
-  { { 0.4f, 0.5f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.5f } },
-  { {-0.4f, 0.6f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.5f } },
-  { {-0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.0f } },
+  { { 0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.0f }, { 0.58f, 0.58f, 0.58f } },
+  { { 0.4f, 0.5f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.5f }, { 0.58f, 0.58f,-0.58f } },
+  { {-0.4f, 0.6f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.5f }, {-0.58f, 0.58f,-0.58f } },
+  { {-0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.0f }, {-0.58f, 0.58f, 0.58f } },
 
-  { { 0.3f, 0.0f, 0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 0.0f } },
-  { { 0.7f, 0.0f,-0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 1.0f } },
-  { {-0.3f, 0.0f,-0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 1.0f } },
-  { {-0.7f, 0.0f, 0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 0.0f } },
+  { { 0.3f, 0.0f, 0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 0.0f }, { 0.71f, 0.0f, 0.71f } },
+  { { 0.7f, 0.0f,-0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 1.0f }, { 0.71f, 0.0f,-0.71f } },
+  { {-0.3f, 0.0f,-0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 1.0f }, {-0.71f, 0.0f,-0.71f } },
+  { {-0.7f, 0.0f, 0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 0.0f }, {-0.71f, 0.0f, 0.71f } },
 
   // 未使用
   { {-0.25f,  0.0f, 0.5f}, {0.0f, 1.0f, 1.0f, 1.0f} },
@@ -106,7 +105,7 @@ const GLushort indices[] = {
   9, 8, 11, 11, 10, 9,
   4, 3, 6, 6, 5, 4,
   3, 12, 13, 13, 6, 3,
-  8, 14, 15, 15, 16, 8,
+  8, 14, 15, 15, 11, 8,
 
   // 石
   0, 1, 2, 2, 3, 0,
@@ -139,7 +138,7 @@ struct Mesh
 const Mesh meshList[] = {
   { GL_TRIANGLES, 3 * 7, (const GLvoid*)0, 0 },
   { GL_TRIANGLES, 3 * 14, (const GLvoid*)(21 * sizeof(indices[0])), 8 },
-  { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 25 },
+  { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 24 },
 };
 
 
@@ -227,6 +226,8 @@ GLuint CreateVAO(GLuint vbo, GLuint ibo)
   glVertexAttribPointer(1, sizeof(Vertex::color) / sizeof(float), GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offsetof(Vertex, color)));
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, sizeof(Vertex::texCoord) / sizeof(float), GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offsetof(Vertex, texCoord)));
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3, sizeof(Vertex::normal) / sizeof(float), GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
   glBindVertexArray(0);
   glDeleteBuffers(1, &vbo);
   glDeleteBuffers(1, &ibo);
@@ -244,8 +245,9 @@ int main()
   const GLuint vbo = CreateVBO(sizeof(vertices), vertices);
   const GLuint ibo = CreateIBO(sizeof(indices), indices);
   const GLuint vao = CreateVAO(vbo, ibo);
-  const GLuint shaderProgram = Shader::Build(vsCode, fsCode);
-  if (!vbo || !ibo || !vao || !shaderProgram) {
+  const GLuint shaderProgram = Shader::BuildFromFile("Res/Simple.vert", "Res/Simple.frag");
+  const GLuint progVertexLighting = Shader::BuildFromFile("Res/VertexLighting.vert", "Res/Simple.frag");
+  if (!vbo || !ibo || !vao || !shaderProgram || !progVertexLighting) {
     return 1;
   }
 
@@ -259,6 +261,22 @@ int main()
   const GLint texColorLoc = glGetUniformLocation(shaderProgram, "texColor");
   if (texColorLoc >= 0) {
     glUniform1i(texColorLoc, 0);
+  }
+
+  const GLint locMatMVP = glGetUniformLocation(progVertexLighting, "matMVP");
+  const GLint locDirLightDir = glGetUniformLocation(progVertexLighting, "directionalLight.direction");
+  const GLint locDirLightCol = glGetUniformLocation(progVertexLighting, "directionalLight.color");
+  const GLint locAmbLightCol = glGetUniformLocation(progVertexLighting, "ambientLight.color");
+  if (locDirLightDir < 0 || locDirLightCol < 0 || locAmbLightCol < 0) {
+    std::cerr << "ERROR: uniform変数の位置を取得できません.\n";
+    return 1;
+  }
+  {
+    glUseProgram(progVertexLighting);
+    const GLint texColorLoc = glGetUniformLocation(progVertexLighting, "texColor");
+    if (texColorLoc >= 0) {
+      glUniform1i(texColorLoc, 0);
+    }
   }
   glUseProgram(0);
 
@@ -295,11 +313,19 @@ int main()
     if (degree >= 360.0f) { degree -= 360.0f; }
     const glm::vec3 viewPos = glm::rotate(glm::mat4(1), glm::radians(degree), glm::vec3(0, 1, 0)) * glm::vec4(-20, 30, -30, 1);
 
-    glUseProgram(shaderProgram);
+    glUseProgram(progVertexLighting);
 
     // 座標変換行列を作成する.
     const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
     const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+    // 光源を設定する.
+    const glm::vec3 ambLightCol = glm::vec3(0.05f, 0.1f, 0.1f);
+    const glm::vec3 dirLightDir = glm::normalize(glm::vec3(5, -2, -2));
+    const glm::vec3 dirLightCol = glm::vec3(1.0f, 1.0f, 1.0f);
+    glUniform3fv(locAmbLightCol, 1, &ambLightCol.x);
+    glUniform3fv(locDirLightDir, 1, &dirLightDir.x);
+    glUniform3fv(locDirLightCol, 1, &dirLightCol.x);
 
     glBindVertexArray(vao);
 
@@ -308,13 +334,19 @@ int main()
 
     const float treeCount = 10;
     for (float i = 0; i < treeCount; ++i) {
-      const float x = std::cos(3.14f * 2 / treeCount * i) * 8;
-      const float z = std::sin(3.14f * 2 / treeCount * i) * 8;
-      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(x, 0, z));
-      const glm::mat4x4 matMVP = matProj * matView * matModel;
-      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
+      const float theta = 3.14f * 2 / treeCount * i;
+      const float x = std::cos(theta) * 8;
+      const float z = std::sin(theta) * 8;
+      const glm::mat4x4 matModelR = glm::rotate(glm::mat4(1), theta * 5, glm::vec3(0, 1, 0));
+      const glm::mat4x4 matModelT = glm::translate(glm::mat4(1), glm::vec3(x, 0, z));
+      const glm::mat4x4 matMVP = matProj * matView * matModelT * matModelR;
+      const glm::vec3 dirLightDirOnModel = glm::inverse(glm::mat3x3(matModelR)) * dirLightDir;
+      glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
+      glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
       glDrawElementsBaseVertex(meshList[0].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
     }
+
+    glUseProgram(shaderProgram);
 
     {
       glActiveTexture(GL_TEXTURE0);
@@ -343,6 +375,7 @@ int main()
 
   glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
+  glDeleteProgram(progVertexLighting);
   glDeleteProgram(shaderProgram);
   glDeleteVertexArrays(1, &vao);
 

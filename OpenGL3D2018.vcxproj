@@ -137,6 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Res\Simple.frag" />
+    <None Include="Res\Simple.vert" />
+    <None Include="Res\VertexLighting.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GLFWEW.h" />
