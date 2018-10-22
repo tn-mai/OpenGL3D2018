@@ -7,6 +7,11 @@
 /// GLFWとGLEWをラップするための名前空間.
 namespace GLFWEW {
 
+void APIENTRY OutputGLDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid *userParam)
+{
+  std::cerr << message << "\n";
+}
+
 /**
 * GLFWからのエラー報告を処理する.
 *
@@ -67,27 +72,31 @@ bool Window::Init(int w, int h, const char* title)
 		if (glfwInit() != GL_TRUE) {
 			return false;
 		}
-		isGLFWInitialized = true;
+        isGLFWInitialized = true;
 	}
 
 	if (!window) {
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 		window = glfwCreateWindow(w, h, title, nullptr, nullptr);
 		if (!window) {
 			return false;
 		}
 		glfwMakeContextCurrent(window);
-	}
+    }
 
 	if (glewInit() != GLEW_OK) {
 		std::cerr << "ERROR: GLEWの初期化に失敗しました." << std::endl;
 		return false;
 	}
 
+    glDebugMessageCallback(OutputGLDebugMessage, nullptr);
+
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	std::cout << "Renderer: " << renderer << std::endl;
 	const GLubyte* version = glGetString(GL_VERSION);
 	std::cout << "Version: " << version << std::endl;
-	isInitialized = true;
+
+    isInitialized = true;
 	return true;
 }
 
