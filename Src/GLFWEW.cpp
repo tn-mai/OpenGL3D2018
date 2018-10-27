@@ -120,4 +120,17 @@ void Window::SwapBuffers() const
 	glfwSwapBuffers(window);
 }
 
+/**
+* キーが押されているか調べる.
+*
+* @param key 調べるキーのID(GLFW_KEY_Aなど).
+*
+* @retval GLFW_PRESS    キーが押されている.
+* @retval GLFW_RELEASE  キーが押されていない.
+*/
+int Window::GetKey(int key) const
+{
+  return glfwGetKey(window, key);
+}
+
 } // namespace GLFWEW

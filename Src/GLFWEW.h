@@ -19,6 +19,8 @@ namespace GLFWEW {
 		bool ShouldClose() const;
 		void SwapBuffers() const;
 
+        int GetKey(int key) const;
+
 	private:
 		Window();
 		~Window();
