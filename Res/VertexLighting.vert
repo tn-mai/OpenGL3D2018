@@ -24,8 +24,16 @@ struct DirectionalLight
   vec3 color;
 };
 
+// ポイントライト.
+struct PointLight
+{
+  vec3 position[8];
+  vec3 color[8];
+};
+
 uniform AmbientLight ambientLight;
 uniform DirectionalLight directionalLight;
+uniform PointLight pointLight;
 uniform mat4x4 matMVP;
 
 /**
@@ -34,7 +42,18 @@ uniform mat4x4 matMVP;
 void main()
 {
   float cosTheta = clamp(dot(vNormal, -directionalLight.direction), 0, 1);
-  outColor.rgb = (vColor.rgb * directionalLight.color * cosTheta);
+  vec3 lightColor = directionalLight.color * cosTheta;
+
+  for (int i = 0; i < 8; ++i) {
+    if (dot(pointLight.color[i], pointLight.color[i]) != 0) {
+      vec3 lightVector = (pointLight.position[i] - vPosition);
+      float power = 1 / dot(lightVector, lightVector);
+      cosTheta = clamp(dot(vNormal, normalize(lightVector)), 0, 1);
+      lightColor += pointLight.color[i] * cosTheta * power;
+	}
+  }
+
+  outColor.rgb = (vColor.rgb * lightColor);
   outColor.rgb += ambientLight.color;
   outColor.a = vColor.a;
   outTexCoord = vTexCoord;

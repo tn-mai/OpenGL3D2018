@@ -51,7 +51,7 @@ const Vertex vertices[] = {
   { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 1.000f, 0.00f }, { 0.71f, 0.0f, 0.71f } },
   { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 1.000f, 0.69f }, { 0.71f, 0.0f, 0.71f } },
   { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.875f, 1.00f }, { 0.00f, 0.0f, 1.00f } },
-  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.750f, 0.69}, {-0.71f, 0.0f, 0.71f } },
+  { {-3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 0.750f, 0.69f }, {-0.71f, 0.0f, 0.71f } },
   { {-2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.750f, 0.00f }, {-0.71f, 0.0f, 0.71f } },
 
   { {-2.8f, 0.0f,-3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 0.500f, 0.00f }, {-0.71f, 0.0f,-0.71f } },
@@ -78,6 +78,12 @@ const Vertex vertices[] = {
   { { 0.7f, 0.0f,-0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 1.0f }, { 0.71f, 0.0f,-0.71f } },
   { {-0.3f, 0.0f,-0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 1.0f }, {-0.71f, 0.0f,-0.71f } },
   { {-0.7f, 0.0f, 0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 0.0f }, {-0.71f, 0.0f, 0.71f } },
+
+  // 地面
+  { {-20.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
+  { { 20.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 10.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
+  { { 20.0f, 0.0f,-20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 10.0f, 10.0f }, { 0.0f, 1.0f, 0.0f } },
+  { {-20.0f, 0.0f,-20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 0.0f, 10.0f }, { 0.0f, 1.0f, 0.0f } },
 
   // 未使用
   { {-0.25f,  0.0f, 0.5f}, {0.0f, 1.0f, 1.0f, 1.0f} },
@@ -114,6 +120,9 @@ const GLushort indices[] = {
   6, 7, 3, 3, 2, 6,
   7, 4, 0, 0, 3, 7,
 
+  // 地面
+  0, 1, 2, 2, 3, 0,
+
   12, 13, 16, 13, 14, 16, 14, 15, 16, 15, 12, 16,
   13, 12, 17, 14, 13, 17, 15, 14, 17, 12, 15, 17,
 
@@ -139,6 +148,7 @@ const Mesh meshList[] = {
   { GL_TRIANGLES, 3 * 7, (const GLvoid*)0, 0 },
   { GL_TRIANGLES, 3 * 14, (const GLvoid*)(21 * sizeof(indices[0])), 8 },
   { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 24 },
+  { GL_TRIANGLES, 6, (const GLvoid*)(93 * sizeof(indices[0])), 32 },
 };
 
 
@@ -264,6 +274,8 @@ int main()
   }
 
   const GLint locMatMVP = glGetUniformLocation(progVertexLighting, "matMVP");
+  const GLint locPointLightPos = glGetUniformLocation(progVertexLighting, "pointLight.position");
+  const GLint locPointLightCol = glGetUniformLocation(progVertexLighting, "pointLight.color");
   const GLint locDirLightDir = glGetUniformLocation(progVertexLighting, "directionalLight.direction");
   const GLint locDirLightCol = glGetUniformLocation(progVertexLighting, "directionalLight.color");
   const GLint locAmbLightCol = glGetUniformLocation(progVertexLighting, "ambientLight.color");
@@ -298,10 +310,17 @@ int main()
   GLuint texId = Texture::CreateImage2D(tw, th, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
   GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
 
+  // ポイント・ライトの設定.
+  glm::vec3 pointLightPos[8] = {};
+  glm::vec3 pointLightCol[8] = {};
+  pointLightPos[0] = glm::vec3(5, 4, 0);
+  pointLightCol[0] = glm::vec3(0.2, 5, 0.4) * 50.0f;
+
   // メインループ.
   while (!window.ShouldClose()) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
@@ -309,9 +328,21 @@ int main()
 
     // 視点を回転移動させる.
     static float degree = 0.0f;
-    degree += 0.1f;
+    degree += 0.01f;
     if (degree >= 360.0f) { degree -= 360.0f; }
     const glm::vec3 viewPos = glm::rotate(glm::mat4(1), glm::radians(degree), glm::vec3(0, 1, 0)) * glm::vec4(-20, 30, -30, 1);
+
+    // ポイント・ライトを移動させる.
+    if (window.GetKey(GLFW_KEY_LEFT) == GLFW_PRESS) {
+      pointLightPos[0].x -= 0.05f;
+    } else if (window.GetKey(GLFW_KEY_RIGHT) == GLFW_PRESS) {
+      pointLightPos[0].x += 0.05f;
+    }
+    if (window.GetKey(GLFW_KEY_UP) == GLFW_PRESS) {
+      pointLightPos[0].z -= 0.05f;
+    } else if (window.GetKey(GLFW_KEY_DOWN) == GLFW_PRESS) {
+      pointLightPos[0].z += 0.05f;
+    }
 
     glUseProgram(progVertexLighting);
 
@@ -326,6 +357,7 @@ int main()
     glUniform3fv(locAmbLightCol, 1, &ambLightCol.x);
     glUniform3fv(locDirLightDir, 1, &dirLightDir.x);
     glUniform3fv(locDirLightCol, 1, &dirLightCol.x);
+    glUniform3fv(locPointLightCol, 8, &pointLightCol[0].x);
 
     glBindVertexArray(vao);
 
@@ -341,9 +373,30 @@ int main()
       const glm::mat4x4 matModelT = glm::translate(glm::mat4(1), glm::vec3(x, 0, z));
       const glm::mat4x4 matMVP = matProj * matView * matModelT * matModelR;
       const glm::vec3 dirLightDirOnModel = glm::inverse(glm::mat3x3(matModelR)) * dirLightDir;
+      const glm::mat4 matInvModel = glm::inverse(matModelT * matModelR);
+      glm::vec3 pointLightPosOnModel[8];
+      for (int i = 0; i < 8; ++i) {
+        pointLightPosOnModel[i] = matInvModel * glm::vec4(pointLightPos[i], 1);
+      }
       glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
+      glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
       glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
       glDrawElementsBaseVertex(meshList[0].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
+    }
+
+    {
+      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+      const glm::mat4x4 matMVP = matProj * matView * matModel;
+      const glm::vec3 dirLightDirOnModel = glm::inverse(glm::mat3x3(1)) * dirLightDir;
+      const glm::mat4 matInvModel = glm::inverse(matModel);
+      glm::vec3 pointLightPosOnModel[8];
+      for (int i = 0; i < 8; ++i) {
+        pointLightPosOnModel[i] = matInvModel * glm::vec4(pointLightPos[i], 1);
+      }
+      glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
+      glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
+      glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
+      glDrawElementsBaseVertex(meshList[3].mode, meshList[3].count, GL_UNSIGNED_SHORT, meshList[3].indices, meshList[3].baseVertex);
     }
 
     glUseProgram(shaderProgram);
@@ -365,6 +418,21 @@ int main()
       const glm::mat4x4 matMVP = matProj * matView * matModel;
       glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
       glDrawElementsBaseVertex(meshList[2].mode, meshList[2].count, GL_UNSIGNED_SHORT, meshList[2].indices, meshList[2].baseVertex);
+    }
+
+    // ポイント・ライトの位置が分かるように適当なモデルを表示.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texId);
+    static float pointLightAngle = 0;
+    pointLightAngle += glm::radians(1.0f);
+    if (pointLightAngle > glm::radians(360.0f)) {
+      pointLightAngle -= glm::radians(360.0f);
+    }
+    for (int i = 0; i < 8; ++i) {
+      const glm::mat4x4 matModel = glm::rotate(glm::scale(glm::translate(glm::mat4(1), pointLightPos[i]), glm::vec3(1.0f, -0.25f, 1.0f)), pointLightAngle, glm::vec3(0, 1, 0));
+      const glm::mat4x4 matMVP = matProj * matView * matModel;
+      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
+      glDrawElementsBaseVertex(meshList[2].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
     }
 
     glActiveTexture(GL_TEXTURE0);
