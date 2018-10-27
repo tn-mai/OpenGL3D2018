@@ -264,8 +264,8 @@ int main()
   const GLuint ibo = CreateIBO(sizeof(indices), indices);
   const GLuint vao = CreateVAO(vbo, ibo);
   const GLuint shaderProgram = Shader::BuildFromFile("Res/Simple.vert", "Res/Simple.frag");
-  const GLuint progVertexLighting = Shader::BuildFromFile("Res/VertexLighting.vert", "Res/Simple.frag");
-  if (!vbo || !ibo || !vao || !shaderProgram || !progVertexLighting) {
+  const GLuint progFragmentLighting = Shader::BuildFromFile("Res/FragmentLighting.vert", "Res/FragmentLighting.frag");
+  if (!vbo || !ibo || !vao || !shaderProgram || !progFragmentLighting) {
     return 1;
   }
 
@@ -281,19 +281,19 @@ int main()
     glUniform1i(texColorLoc, 0);
   }
 
-  const GLint locMatMVP = glGetUniformLocation(progVertexLighting, "matMVP");
-  const GLint locPointLightPos = glGetUniformLocation(progVertexLighting, "pointLight.position");
-  const GLint locPointLightCol = glGetUniformLocation(progVertexLighting, "pointLight.color");
-  const GLint locDirLightDir = glGetUniformLocation(progVertexLighting, "directionalLight.direction");
-  const GLint locDirLightCol = glGetUniformLocation(progVertexLighting, "directionalLight.color");
-  const GLint locAmbLightCol = glGetUniformLocation(progVertexLighting, "ambientLight.color");
+  const GLint locMatMVP = glGetUniformLocation(progFragmentLighting, "matMVP");
+  const GLint locPointLightPos = glGetUniformLocation(progFragmentLighting, "pointLight.position");
+  const GLint locPointLightCol = glGetUniformLocation(progFragmentLighting, "pointLight.color");
+  const GLint locDirLightDir = glGetUniformLocation(progFragmentLighting, "directionalLight.direction");
+  const GLint locDirLightCol = glGetUniformLocation(progFragmentLighting, "directionalLight.color");
+  const GLint locAmbLightCol = glGetUniformLocation(progFragmentLighting, "ambientLight.color");
   if (locDirLightDir < 0 || locDirLightCol < 0 || locAmbLightCol < 0) {
     std::cerr << "ERROR: uniform変数の位置を取得できません.\n";
     return 1;
   }
   {
-    glUseProgram(progVertexLighting);
-    const GLint texColorLoc = glGetUniformLocation(progVertexLighting, "texColor");
+    glUseProgram(progFragmentLighting);
+    const GLint texColorLoc = glGetUniformLocation(progFragmentLighting, "texColor");
     if (texColorLoc >= 0) {
       glUniform1i(texColorLoc, 0);
     }
@@ -322,7 +322,7 @@ int main()
   glm::vec3 pointLightPos[8] = {};
   glm::vec3 pointLightCol[8] = {};
   pointLightPos[0] = glm::vec3(5, 4, 0);
-  pointLightCol[0] = glm::vec3(0.2, 5, 0.4) * 50.0f;
+  pointLightCol[0] = glm::vec3(1.0f, 0.8f, 0.4f) * 100.0f;
 
   // メインループ.
   while (!window.ShouldClose()) {
@@ -352,7 +352,7 @@ int main()
       pointLightPos[0].z += 0.05f;
     }
 
-    glUseProgram(progVertexLighting);
+    glUseProgram(progFragmentLighting);
 
     // 座標変換行列を作成する.
     const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
@@ -451,7 +451,7 @@ int main()
 
   glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
-  glDeleteProgram(progVertexLighting);
+  glDeleteProgram(progFragmentLighting);
   glDeleteProgram(shaderProgram);
   glDeleteVertexArrays(1, &vao);
 
