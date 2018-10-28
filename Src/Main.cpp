@@ -4,36 +4,10 @@
 #include "GLFWEW.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Geometry.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <vector>
-
-/// 2Dベクトル型.
-struct Vector2
-{
-  float x, y;
-};
-
-/// 3Dベクトル型.
-struct Vector3
-{
-  float x, y, z;
-};
-
-/// RGBAカラー型.
-struct Color
-{
-  float r, g, b, a;
-};
-
-/// 頂点データ型.
-struct Vertex
-{
-  Vector3 position; ///< 座標
-  Color color; ///< 色
-  Vector2 texCoord; ///< テクスチャ座標.
-  Vector3 normal; ///< 法線.
-};
 
 /// 頂点データ.
 const Vertex vertices[] = {
@@ -139,17 +113,6 @@ const GLushort indices[] = {
 };
 
 /**
-* ポリゴン表示単位.
-*/
-struct Mesh
-{
-  GLenum mode; ///< プリミティブの種類.
-  GLsizei count; ///< 描画するインデックス数.
-  const GLvoid* indices; ///< 描画開始インデックスのバイトオフセット.
-  GLint baseVertex; ///< インデックス0とみなされる頂点配列内の位置.
-};
-
-/**
 * メッシュ配列.
 */
 const Mesh meshList[] = {
@@ -158,7 +121,6 @@ const Mesh meshList[] = {
   { GL_TRIANGLES, 3 * 10, (const GLvoid*)(63 * sizeof(indices[0])), 24 },
   { GL_TRIANGLES, 24, (const GLvoid*)(93 * sizeof(indices[0])), 32 },
 };
-
 
 /// 頂点シェーダ.
 static const char* vsCode =
@@ -264,8 +226,8 @@ int main()
   const GLuint ibo = CreateIBO(sizeof(indices), indices);
   const GLuint vao = CreateVAO(vbo, ibo);
   const GLuint shaderProgram = Shader::BuildFromFile("Res/Simple.vert", "Res/Simple.frag");
-  const GLuint progFragmentLighting = Shader::BuildFromFile("Res/FragmentLighting.vert", "Res/FragmentLighting.frag");
-  if (!vbo || !ibo || !vao || !shaderProgram || !progFragmentLighting) {
+  const GLuint fragmentLightingId = Shader::BuildFromFile("Res/FragmentLighting.vert", "Res/FragmentLighting.frag");
+  if (!vbo || !ibo || !vao || !shaderProgram || !fragmentLightingId) {
     return 1;
   }
 
@@ -281,24 +243,7 @@ int main()
     glUniform1i(texColorLoc, 0);
   }
 
-  const GLint locMatMVP = glGetUniformLocation(progFragmentLighting, "matMVP");
-  const GLint locPointLightPos = glGetUniformLocation(progFragmentLighting, "pointLight.position");
-  const GLint locPointLightCol = glGetUniformLocation(progFragmentLighting, "pointLight.color");
-  const GLint locDirLightDir = glGetUniformLocation(progFragmentLighting, "directionalLight.direction");
-  const GLint locDirLightCol = glGetUniformLocation(progFragmentLighting, "directionalLight.color");
-  const GLint locAmbLightCol = glGetUniformLocation(progFragmentLighting, "ambientLight.color");
-  if (locDirLightDir < 0 || locDirLightCol < 0 || locAmbLightCol < 0) {
-    std::cerr << "ERROR: uniform変数の位置を取得できません.\n";
-    return 1;
-  }
-  {
-    glUseProgram(progFragmentLighting);
-    const GLint texColorLoc = glGetUniformLocation(progFragmentLighting, "texColor");
-    if (texColorLoc >= 0) {
-      glUniform1i(texColorLoc, 0);
-    }
-  }
-  glUseProgram(0);
+  Shader::Program progFragmentLighting(fragmentLightingId);
 
   // テクスチャを作成する.
   const int tw = 8; // 画像の幅.
@@ -318,11 +263,13 @@ int main()
   GLuint texId = Texture::CreateImage2D(tw, th, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
   GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
 
-  // ポイント・ライトの設定.
-  glm::vec3 pointLightPos[8] = {};
-  glm::vec3 pointLightCol[8] = {};
-  pointLightPos[0] = glm::vec3(5, 4, 0);
-  pointLightCol[0] = glm::vec3(1.0f, 0.8f, 0.4f) * 100.0f;
+  // ライトの設定.
+  Shader::LightList lights;
+  lights.ambient.color = glm::vec3(0.05f, 0.1f, 0.1f);
+  lights.directional.direction = glm::normalize(glm::vec3(5, -2, -2));
+  lights.directional.color = glm::vec3(1, 1, 1);
+  lights.point.position[0] = glm::vec3(5, 4, 0);
+  lights.point.color[0] = glm::vec3(1.0f, 0.8f, 0.4f) * 100.0f;
 
   // メインループ.
   while (!window.ShouldClose()) {
@@ -342,70 +289,38 @@ int main()
 
     // ポイント・ライトを移動させる.
     if (window.GetKey(GLFW_KEY_LEFT) == GLFW_PRESS) {
-      pointLightPos[0].x -= 0.05f;
+      lights.point.position[0].x -= 0.05f;
     } else if (window.GetKey(GLFW_KEY_RIGHT) == GLFW_PRESS) {
-      pointLightPos[0].x += 0.05f;
+      lights.point.position[0].x += 0.05f;
     }
     if (window.GetKey(GLFW_KEY_UP) == GLFW_PRESS) {
-      pointLightPos[0].z -= 0.05f;
+      lights.point.position[0].z -= 0.05f;
     } else if (window.GetKey(GLFW_KEY_DOWN) == GLFW_PRESS) {
-      pointLightPos[0].z += 0.05f;
+      lights.point.position[0].z += 0.05f;
     }
 
-    glUseProgram(progFragmentLighting);
+    progFragmentLighting.Use();
 
     // 座標変換行列を作成する.
     const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
     const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    progFragmentLighting.SetViewProjectionMatrix(matProj * matView);
 
     // 光源を設定する.
-    const glm::vec3 ambLightCol = glm::vec3(0.05f, 0.1f, 0.1f);
-    const glm::vec3 dirLightDir = glm::normalize(glm::vec3(5, -2, -2));
-    const glm::vec3 dirLightCol = glm::vec3(1.0f, 1.0f, 1.0f);
-    glUniform3fv(locAmbLightCol, 1, &ambLightCol.x);
-    glUniform3fv(locDirLightDir, 1, &dirLightDir.x);
-    glUniform3fv(locDirLightCol, 1, &dirLightCol.x);
-    glUniform3fv(locPointLightCol, 8, &pointLightCol[0].x);
+    progFragmentLighting.SetLightList(lights);
 
-    glBindVertexArray(vao);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texId);
+    progFragmentLighting.BindVertexArray(vao);
+    progFragmentLighting.BindTexture(0, texId);
 
     const float treeCount = 10;
     for (float i = 0; i < treeCount; ++i) {
       const float theta = 3.14f * 2 / treeCount * i;
       const float x = std::cos(theta) * 8;
       const float z = std::sin(theta) * 8;
-      const glm::mat4x4 matModelR = glm::rotate(glm::mat4(1), theta * 5, glm::vec3(0, 1, 0));
-      const glm::mat4x4 matModelT = glm::translate(glm::mat4(1), glm::vec3(x, 0, z));
-      const glm::mat4x4 matMVP = matProj * matView * matModelT * matModelR;
-      const glm::vec3 dirLightDirOnModel = glm::inverse(glm::mat3x3(matModelR)) * dirLightDir;
-      const glm::mat4 matInvModel = glm::inverse(matModelT * matModelR);
-      glm::vec3 pointLightPosOnModel[8];
-      for (int i = 0; i < 8; ++i) {
-        pointLightPosOnModel[i] = matInvModel * glm::vec4(pointLightPos[i], 1);
-      }
-      glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
-      glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
-      glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
-      glDrawElementsBaseVertex(meshList[0].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
+      progFragmentLighting.Draw(meshList[0], glm::vec3(x, 0, z), glm::vec3(0, theta * 5, 0), glm::vec3(1));
     }
 
-    {
-      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-      const glm::mat4x4 matMVP = matProj * matView * matModel;
-      const glm::vec3 dirLightDirOnModel = glm::inverse(glm::mat3x3(1)) * dirLightDir;
-      const glm::mat4 matInvModel = glm::inverse(matModel);
-      glm::vec3 pointLightPosOnModel[8];
-      for (int i = 0; i < 8; ++i) {
-        pointLightPosOnModel[i] = matInvModel * glm::vec4(pointLightPos[i], 1);
-      }
-      glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
-      glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
-      glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
-      glDrawElementsBaseVertex(meshList[3].mode, meshList[3].count, GL_UNSIGNED_SHORT, meshList[3].indices, meshList[3].baseVertex);
-    }
+    progFragmentLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
 
     glUseProgram(shaderProgram);
 
@@ -437,7 +352,7 @@ int main()
       pointLightAngle -= glm::radians(360.0f);
     }
     for (int i = 0; i < 8; ++i) {
-      const glm::mat4x4 matModel = glm::rotate(glm::scale(glm::translate(glm::mat4(1), pointLightPos[i]), glm::vec3(1.0f, -0.25f, 1.0f)), pointLightAngle, glm::vec3(0, 1, 0));
+      const glm::mat4x4 matModel = glm::rotate(glm::scale(glm::translate(glm::mat4(1), lights.point.position[i]), glm::vec3(1.0f, -0.25f, 1.0f)), pointLightAngle, glm::vec3(0, 1, 0));
       const glm::mat4x4 matMVP = matProj * matView * matModel;
       glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
       glDrawElementsBaseVertex(meshList[2].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
@@ -451,7 +366,6 @@ int main()
 
   glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
-  glDeleteProgram(progFragmentLighting);
   glDeleteProgram(shaderProgram);
   glDeleteVertexArrays(1, &vao);
 
