@@ -30,9 +30,18 @@ struct PointLight
   vec3 color[8];
 };
 
+// スポットライト
+struct SpotLight
+{
+  vec3 position[4];
+  vec4 dirAndCutOff[4];
+  vec3 color[4];
+};
+
 uniform AmbientLight ambientLight;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLight;
+uniform SpotLight spotLight;
 
 uniform sampler2D texColor;
 
@@ -52,6 +61,18 @@ void main()
       float power = 1 / dot(lightVector, lightVector);
       float cosTheta = clamp(dot(inNormal, normalize(lightVector)), 0, 1);
       lightColor += pointLight.color[i] * cosTheta * power;
+	}
+  }
+
+  // スポットライトの明るさを計算する.
+  for (int i = 0; i < 4; ++i) {
+    if (dot(spotLight.color[i], spotLight.color[i]) != 0) {
+      vec3 lightLine = (spotLight.position[i] - inPosition);
+	  vec3 lightVector = normalize(lightLine);
+	  float cutOff = smoothstep(spotLight.dirAndCutOff[i].w, 1, dot(-lightVector, spotLight.dirAndCutOff[i].xyz));
+      float power = 1 / dot(lightLine, lightLine) * cutOff;
+      float cosTheta = clamp(dot(inNormal, lightVector), 0, 1);
+      lightColor += spotLight.color[i] * cosTheta * power;
 	}
   }
 

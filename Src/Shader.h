@@ -39,6 +39,14 @@ struct PointLight
   glm::vec3 color[8];
 };
 
+// スポットライト
+struct SpotLight
+{
+  glm::vec3 position[4];
+  glm::vec4 dirAndCutOff[4];
+  glm::vec3 color[4];
+};
+
 /**
 * ライトをまとめた構造体.
 */
@@ -47,6 +55,7 @@ struct LightList
   AmbientLight ambient;
   DirectionalLight directional;
   PointLight point;
+  SpotLight spot;
 };
 
 /**
@@ -75,6 +84,9 @@ private:
   GLint locDirLightDir;
   GLint locDirLightCol;
   GLint locAmbLightCol;
+  GLint locSpotLightPos;
+  GLint locSpotLightDir;
+  GLint locSpotLightCol;
 
   glm::mat4 matVP;
   LightList lights;

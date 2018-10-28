@@ -139,6 +139,9 @@ Program::Program(GLuint id) : id(id)
   locDirLightDir = glGetUniformLocation(id, "directionalLight.direction");
   locDirLightCol = glGetUniformLocation(id, "directionalLight.color");
   locAmbLightCol = glGetUniformLocation(id, "ambientLight.color");
+  locSpotLightPos = glGetUniformLocation(id, "spotLight.position");
+  locSpotLightDir = glGetUniformLocation(id, "spotLight.dirAndCutOff");
+  locSpotLightCol = glGetUniformLocation(id, "spotLight.color");
 
   const GLint texColorLoc = glGetUniformLocation(id, "texColor");
   if (texColorLoc >= 0) {
@@ -211,6 +214,9 @@ void Program::SetLightList(const LightList& lights)
   if (locPointLightCol >= 0) {
     glUniform3fv(locPointLightCol, 8, &lights.point.color[0].x);
   }
+  if (locSpotLightCol >= 0) {
+    glUniform3fv(locSpotLightCol, 4, &lights.spot.color[0].x);
+  }
 }
 
 /**
@@ -262,6 +268,20 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
       pointLightPosOnModel[i] = matInvModel * glm::vec4(lights.point.position[i], 1);
     }
     glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
+  }
+
+  // モデル座標系におけるスポットライトの座標を計算し、GPUメモリに転送する.
+  if (locSpotLightPos >= 0 && locSpotLightDir >= 0) {
+    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXYZ));
+    const glm::mat4 matInvModel = glm::inverse(matModel);
+    glm::vec3 spotLightPosOnModel[4];
+    glm::vec4 spotLightDirOnModel[4];
+    for (int i = 0; i < 4; ++i) {
+      spotLightPosOnModel[i] = matInvModel * glm::vec4(lights.spot.position[i], 1);
+      spotLightDirOnModel[i] = glm::vec4(matInvRotate * glm::vec4(glm::vec3(lights.spot.dirAndCutOff[0]), 1), lights.spot.dirAndCutOff[i].w);
+    }
+    glUniform3fv(locSpotLightPos, 4, &spotLightPosOnModel[0].x);
+    glUniform4fv(locSpotLightDir, 4, &spotLightDirOnModel[0].x);
   }
 
   // メッシュを描画する.
