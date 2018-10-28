@@ -231,18 +231,7 @@ int main()
     return 1;
   }
 
-  // uniform変数の位置を取得.
-  glUseProgram(shaderProgram);
-  const GLint matMVPLoc = glGetUniformLocation(shaderProgram, "matMVP");
-  if (matMVPLoc < 0) {
-    std::cerr << "ERROR: uniform変数'matMVP'の位置を取得できません.\n";
-    return 1;
-  }
-  const GLint texColorLoc = glGetUniformLocation(shaderProgram, "texColor");
-  if (texColorLoc >= 0) {
-    glUniform1i(texColorLoc, 0);
-  }
-
+  Shader::Program progSimple(shaderProgram);
   Shader::Program progFragmentLighting(fragmentLightingId);
 
   // テクスチャを作成する.
@@ -322,51 +311,35 @@ int main()
 
     progFragmentLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
 
-    glUseProgram(shaderProgram);
+    progSimple.Use();
+    progSimple.SetViewProjectionMatrix(matProj * matView);
+    progSimple.BindVertexArray(vao);
 
-    {
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, texHouse);
-
-      const glm::mat4x4 matModel = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-      const glm::mat4x4 matMVP = matProj * matView * matModel;
-      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
-      glDrawElementsBaseVertex(meshList[1].mode, meshList[1].count, GL_UNSIGNED_SHORT, meshList[1].indices, meshList[1].baseVertex);
-    }
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texId);
-    {
-      const glm::mat4x4 matModel = glm::scale(glm::translate(glm::mat4(1), glm::vec3(4, 0, 0)), glm::vec3(1));
-      const glm::mat4x4 matMVP = matProj * matView * matModel;
-      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
-      glDrawElementsBaseVertex(meshList[2].mode, meshList[2].count, GL_UNSIGNED_SHORT, meshList[2].indices, meshList[2].baseVertex);
-    }
+    progSimple.BindTexture(0, texHouse);
+    progSimple.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
+    progSimple.BindTexture(0, texId);
+    progSimple.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
     // ポイント・ライトの位置が分かるように適当なモデルを表示.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texId);
+    progSimple.BindTexture(0, texId);
     static float pointLightAngle = 0;
     pointLightAngle += glm::radians(1.0f);
     if (pointLightAngle > glm::radians(360.0f)) {
       pointLightAngle -= glm::radians(360.0f);
     }
     for (int i = 0; i < 8; ++i) {
-      const glm::mat4x4 matModel = glm::rotate(glm::scale(glm::translate(glm::mat4(1), lights.point.position[i]), glm::vec3(1.0f, -0.25f, 1.0f)), pointLightAngle, glm::vec3(0, 1, 0));
-      const glm::mat4x4 matMVP = matProj * matView * matModel;
-      glUniformMatrix4fv(matMVPLoc, 1, GL_FALSE, &matMVP[0][0]);
-      glDrawElementsBaseVertex(meshList[2].mode, meshList[0].count, GL_UNSIGNED_SHORT, meshList[0].indices, meshList[0].baseVertex);
+      progSimple.Draw(meshList[0], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
     }
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glUseProgram(0);
 
     window.SwapBuffers();
   }
 
   glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
-  glDeleteProgram(shaderProgram);
   glDeleteVertexArrays(1, &vao);
 
   return 0;

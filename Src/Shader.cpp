@@ -202,9 +202,15 @@ void Program::SetLightList(const LightList& lights)
   this->lights = lights;
 
   // ライトの色情報をGPUメモリに転送する.
-  glUniform3fv(locAmbLightCol, 1, &lights.ambient.color.x);
-  glUniform3fv(locDirLightCol, 1, &lights.directional.color.x);
-  glUniform3fv(locPointLightCol, 8, &lights.point.color[0].x);
+  if (locAmbLightCol >= 0) {
+    glUniform3fv(locAmbLightCol, 1, &lights.ambient.color.x);
+  }
+  if (locDirLightCol >= 0) {
+    glUniform3fv(locDirLightCol, 1, &lights.directional.color.x);
+  }
+  if (locPointLightCol >= 0) {
+    glUniform3fv(locPointLightCol, 8, &lights.point.color[0].x);
+  }
 }
 
 /**
@@ -242,17 +248,21 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
   glUniformMatrix4fv(locMatMVP, 1, GL_FALSE, &matMVP[0][0]);
 
   // モデル座標系における指向性ライトの方向を計算し、GPUメモリに転送する.
-  const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXYZ));
-  const glm::vec3 dirLightDirOnModel = matInvRotate * lights.directional.direction;
-  glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
+  if (locDirLightDir >= 0) {
+    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXYZ));
+    const glm::vec3 dirLightDirOnModel = matInvRotate * lights.directional.direction;
+    glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
+  }
 
   // モデル座標系におけるポイントライトの座標を計算し、GPUメモリに転送する.
-  const glm::mat4 matInvModel = glm::inverse(matModel);
-  glm::vec3 pointLightPosOnModel[8];
-  for (int i = 0; i < 8; ++i) {
-    pointLightPosOnModel[i] = matInvModel * glm::vec4(lights.point.position[i], 1);
+  if (locPointLightPos >= 0) {
+    const glm::mat4 matInvModel = glm::inverse(matModel);
+    glm::vec3 pointLightPosOnModel[8];
+    for (int i = 0; i < 8; ++i) {
+      pointLightPosOnModel[i] = matInvModel * glm::vec4(lights.point.position[i], 1);
+    }
+    glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
   }
-  glUniform3fv(locPointLightPos, 8, &pointLightPosOnModel[0].x);
 
   // メッシュを描画する.
   glDrawElementsBaseVertex(mesh.mode, mesh.count, GL_UNSIGNED_SHORT, mesh.indices, mesh.baseVertex);
