@@ -7,7 +7,6 @@
 #include "Geometry.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
-#include <vector>
 
 /// 頂点データ.
 const Vertex vertices[] = {
@@ -337,6 +336,7 @@ int main()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
     glUseProgram(0);
 
     window.SwapBuffers();
