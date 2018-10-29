@@ -4,9 +4,10 @@
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED
 #include <GL/glew.h>
-#include "Geometry.h"
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
+
+struct Mesh;
 
 namespace Shader {
 
