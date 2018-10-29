@@ -51,32 +51,32 @@ uniform sampler2D texColor;
 void main()
 {
   // 指向性ライトの明るさを計算する.
-  float cosTheta = clamp(dot(inNormal, -directionalLight.direction), 0, 1);
+  float cosTheta = clamp(dot(inNormal, -directionalLight.direction), 0.0, 1.0);
   vec3 lightColor = directionalLight.color * cosTheta;
 
   // ポイントライトの明るさを計算する.
   for (int i = 0; i < 8; ++i) {
     if (dot(pointLight.color[i], pointLight.color[i]) != 0) {
-      vec3 lightVector = (pointLight.position[i] - inPosition);
-      float power = 1 / dot(lightVector, lightVector);
-      float cosTheta = clamp(dot(inNormal, normalize(lightVector)), 0, 1);
-      lightColor += pointLight.color[i] * cosTheta * power;
-	}
+      vec3 lightVector = pointLight.position[i] - inPosition;
+      float intensity = 1.0 / (1.0 + dot(lightVector, lightVector));
+      float cosTheta = clamp(dot(inNormal, normalize(lightVector)), 0.0, 1.0);
+      lightColor += pointLight.color[i] * cosTheta * intensity;
+    }
   }
 
   // スポットライトの明るさを計算する.
   for (int i = 0; i < 4; ++i) {
     if (dot(spotLight.color[i], spotLight.color[i]) != 0) {
-      vec3 lightLine = (spotLight.position[i] - inPosition);
-	  vec3 lightVector = normalize(lightLine);
-	  float cutOff = smoothstep(spotLight.dirAndCutOff[i].w, 1, dot(-lightVector, spotLight.dirAndCutOff[i].xyz));
-      float power = 1 / dot(lightLine, lightLine) * cutOff;
-      float cosTheta = clamp(dot(inNormal, lightVector), 0, 1);
-      lightColor += spotLight.color[i] * cosTheta * power;
-	}
+      vec3 lightVector = spotLight.position[i] - inPosition;
+      vec3 lightDir = normalize(lightVector);
+      float cutOff = smoothstep(spotLight.dirAndCutOff[i].w, 1, dot(lightDir, -spotLight.dirAndCutOff[i].xyz));
+      float intensity = 1.0 / (1.0 + dot(lightVector, lightVector)) * cutOff;
+      float cosTheta = clamp(dot(inNormal, lightDir), 0.0, 1.0);
+      lightColor += spotLight.color[i] * cosTheta * intensity;
+    }
   }
 
   fragColor = inColor * texture(texColor, inTexCoord);
-  fragColor.rgb = (fragColor.rgb * lightColor);
+  fragColor.rgb *= lightColor;
   fragColor.rgb += ambientLight.color;
 }
