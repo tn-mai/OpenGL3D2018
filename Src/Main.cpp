@@ -260,7 +260,7 @@ int main()
   lights.directional.color = glm::vec3(1, 1, 1);
   lights.point.position[0] = glm::vec3(5, 4, 0);
   lights.point.color[0] = glm::vec3(1.0f, 0.8f, 0.4f) * 100.0f;
-  lights.spot.position[0] = glm::vec3(-10, 4, 0);
+  lights.spot.posAndInnerCutOff[0] = glm::vec4(-10, 4, 0, std::cos(glm::radians(15.0f)));
   lights.spot.dirAndCutOff[0] = glm::vec4(glm::normalize(glm::vec3(2, -1, -2)), std::cos(glm::radians(20.0f)));
   lights.spot.color[0] = glm::vec3(0.4f, 0.8f, 1.0f) * 200.0f;
 

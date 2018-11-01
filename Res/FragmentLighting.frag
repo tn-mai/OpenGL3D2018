@@ -33,8 +33,8 @@ struct PointLight
 // スポットライト
 struct SpotLight
 {
-  vec3 position[4];
   vec4 dirAndCutOff[4];
+  vec4 posAndInnerCutOff[4];
   vec3 color[4];
 };
 
@@ -50,16 +50,23 @@ uniform sampler2D texColor;
 */
 void main()
 {
+  vec3 normal = normalize(inNormal);
+
   // 指向性ライトの明るさを計算する.
-  float cosTheta = clamp(dot(inNormal, -directionalLight.direction), 0.0, 1.0);
+  float cosTheta = clamp(dot(normal, -directionalLight.direction), 0.0, 1.0);
   vec3 lightColor = directionalLight.color * cosTheta;
 
   // ポイントライトの明るさを計算する.
   for (int i = 0; i < 8; ++i) {
     if (dot(pointLight.color[i], pointLight.color[i]) != 0) {
+      // フラグメントからライトへ向かうベクトルを計算.
       vec3 lightVector = pointLight.position[i] - inPosition;
+      vec3 lightDir = normalize(lightVector);
+      // 面の傾きによる明るさの変化量を計算.
+      float cosTheta = clamp(dot(normal, lightDir), 0.0, 1.0);
+      // 距離による明るさの変化量を計算.
       float intensity = 1.0 / (1.0 + dot(lightVector, lightVector));
-      float cosTheta = clamp(dot(inNormal, normalize(lightVector)), 0.0, 1.0);
+      // 変化量をかけ合わせて明るさを求め、合計に加算.
       lightColor += pointLight.color[i] * cosTheta * intensity;
     }
   }
@@ -67,12 +74,18 @@ void main()
   // スポットライトの明るさを計算する.
   for (int i = 0; i < 4; ++i) {
     if (dot(spotLight.color[i], spotLight.color[i]) != 0) {
-      vec3 lightVector = spotLight.position[i] - inPosition;
+      // フラグメントからライトへ向かうベクトルを計算.
+      vec3 lightVector = spotLight.posAndInnerCutOff[i].xyz - inPosition;
       vec3 lightDir = normalize(lightVector);
-      float cutOff = smoothstep(spotLight.dirAndCutOff[i].w, 1, dot(lightDir, -spotLight.dirAndCutOff[i].xyz));
-      float intensity = 1.0 / (1.0 + dot(lightVector, lightVector)) * cutOff;
-      float cosTheta = clamp(dot(inNormal, lightDir), 0.0, 1.0);
-      lightColor += spotLight.color[i] * cosTheta * intensity;
+      // 面の傾きによる明るさの変化量を計算.
+      float cosTheta = clamp(dot(normal, lightDir), 0.0, 1.0);
+      // 距離による明るさの変化量を計算.
+      float intensity = 1.0 / (1.0 + dot(lightVector, lightVector));
+      // 放射角による明るさの変化量を計算.
+      float spotCosTheta = dot(lightDir, -spotLight.dirAndCutOff[i].xyz);
+      float cutOff = smoothstep(spotLight.dirAndCutOff[i].w, spotLight.posAndInnerCutOff[i].w, spotCosTheta);
+      // 変化量をかけ合わせて明るさを求め、合計に加算.
+      lightColor += spotLight.color[i] * cosTheta * intensity * cutOff;
     }
   }
 

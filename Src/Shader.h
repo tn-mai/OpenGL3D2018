@@ -43,8 +43,8 @@ struct PointLight
 // スポットライト
 struct SpotLight
 {
-  glm::vec3 position[4];
   glm::vec4 dirAndCutOff[4];
+  glm::vec4 posAndInnerCutOff[4];
   glm::vec3 color[4];
 };
 
