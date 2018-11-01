@@ -42,15 +42,15 @@ const Vertex vertices[] = {
   { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.000f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
 
   // 岩
-  { { 0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.0f }, { 0.58f, 0.58f, 0.58f } },
-  { { 0.4f, 0.5f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.5f, 0.5f }, { 0.58f, 0.58f,-0.58f } },
-  { {-0.4f, 0.6f,-0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.5f }, {-0.58f, 0.58f,-0.58f } },
-  { {-0.4f, 0.4f, 0.4f}, {0.2f, 0.2f, 0.2f, 1.0f}, { 0.0f, 0.0f }, {-0.58f, 0.58f, 0.58f } },
+  { { 0.8f, 0.8f, 0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.5f, 0.0f }, { 0.58f, 0.58f, 0.58f } },
+  { { 0.8f, 1.0f,-0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.5f, 0.5f }, { 0.58f, 0.58f,-0.58f } },
+  { {-0.8f, 1.2f,-0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.5f }, {-0.58f, 0.58f,-0.58f } },
+  { {-0.8f, 0.8f, 0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f }, {-0.58f, 0.58f, 0.58f } },
 
-  { { 0.3f, 0.0f, 0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 0.0f }, { 0.71f, 0.0f, 0.71f } },
-  { { 0.7f, 0.0f,-0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 1.0f, 1.0f }, { 0.71f, 0.0f,-0.71f } },
-  { {-0.3f, 0.0f,-0.7f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 1.0f }, {-0.71f, 0.0f,-0.71f } },
-  { {-0.7f, 0.0f, 0.3f}, {0.3f, 0.3f, 0.3f, 1.0f}, { 0.0f, 0.0f }, {-0.71f, 0.0f, 0.71f } },
+  { { 0.6f, 0.0f, 1.4f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 0.0f }, { 0.71f, 0.0f, 0.71f } },
+  { { 1.4f, 0.0f,-0.6f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f }, { 0.71f, 0.0f,-0.71f } },
+  { {-0.6f, 0.0f,-1.4f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 1.0f }, {-0.71f, 0.0f,-0.71f } },
+  { {-1.4f, 0.0f, 0.6f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f }, {-0.71f, 0.0f, 0.71f } },
 
   // 地面
   { {-20.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
@@ -250,6 +250,7 @@ int main()
   };
   GLuint texId = Texture::CreateImage2D(tw, th, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
   GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
+  GLuint texRock = Texture::LoadImage2D("Res/Rock.tga");
 
   // ライトの設定.
   Shader::LightList lights;
@@ -320,7 +321,7 @@ int main()
 
     progSimple.BindTexture(0, texHouse);
     progSimple.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
-    progSimple.BindTexture(0, texId);
+    progSimple.BindTexture(0, texRock);
     progSimple.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
     // ポイント・ライトの位置が分かるように適当なモデルを表示.
@@ -342,6 +343,7 @@ int main()
     window.SwapBuffers();
   }
 
+  glDeleteTextures(1, &texRock);
   glDeleteTextures(1, &texHouse);
   glDeleteTextures(1, &texId);
   glDeleteVertexArrays(1, &vao);
