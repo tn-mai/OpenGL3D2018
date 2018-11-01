@@ -234,21 +234,22 @@ int main()
   Shader::Program progFragmentLighting(fragmentLightingId);
 
   // テクスチャを作成する.
-  const int tw = 8; // 画像の幅.
-  const int th = 8; // 画像の高さ.
+  const int imageWidth = 8; // 画像の幅.
+  const int imageHeight = 8; // 画像の高さ.
   const GLuint B = 0xff'00'00'00; // 黒.
   const GLuint W = 0xff'ff'ff'ff; // 白.
-  const GLuint imageData[tw * th] = {
+  const GLuint imageData[imageWidth * imageHeight] = {
     W, W, B, W, W, W, W, W,
     W, W, B, W, W, W, W, W,
     W, W, B, W, W, W, W, W,
     B, B, B, B, B, B, B, B,
+
     W, W, W, W, W, W, B, W,
     W, W, W, W, W, W, B, W,
     W, W, W, W, W, W, B, W,
     B, B, B, B, B, B, B, B,
   };
-  GLuint texId = Texture::CreateImage2D(tw, th, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
+  GLuint texId = Texture::CreateImage2D(imageWidth, imageHeight, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
   GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
   GLuint texRock = Texture::LoadImage2D("Res/Rock.tga");
 
