@@ -322,6 +322,8 @@ int main()
 
     progSimple.BindTexture(0, texHouse);
     progSimple.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
+    progSimple.Draw(meshList[1], glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
+    progSimple.Draw(meshList[1], glm::vec3(0, 0,-15), glm::vec3(0), glm::vec3(1));
     progSimple.BindTexture(0, texRock);
     progSimple.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
