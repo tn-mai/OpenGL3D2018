@@ -5,6 +5,7 @@
 #define GLFWEW_H_INCLUDED
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
 
 namespace GLFWEW {
 
@@ -19,7 +20,13 @@ namespace GLFWEW {
 		bool ShouldClose() const;
 		void SwapBuffers() const;
 
-        int GetKey(int key) const;
+        void InitTimer();
+        void UpdateTimer();
+        double DeltaTime() const;
+
+        bool IsKeyPressed(int key) const;
+        glm::vec2 GetMousePosition() const;
+        int GetMouseButton(int button) const;
 
 	private:
 		Window();
@@ -30,6 +37,8 @@ namespace GLFWEW {
 		bool isGLFWInitialized = false;
 		bool isInitialized = false;
 		GLFWwindow* window = nullptr;
+        double previousTime = 0;
+        double deltaTime = 0;
 	};
 
 } // namespace GLFWEW

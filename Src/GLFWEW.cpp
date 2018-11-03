@@ -125,12 +125,73 @@ void Window::SwapBuffers() const
 *
 * @param key 調べるキーのID(GLFW_KEY_Aなど).
 *
-* @retval GLFW_PRESS    キーが押されている.
-* @retval GLFW_RELEASE  キーが押されていない.
+* @retval true  キーが押されている.
+* @retval false キーが押されていない.
 */
-int Window::GetKey(int key) const
+bool Window::IsKeyPressed(int key) const
 {
-  return glfwGetKey(window, key);
+  return glfwGetKey(window, key) == GLFW_PRESS;
+}
+
+/**
+* タイマーを初期化する.
+*
+* @sa UpdateTimer, GetDeltaTime
+*/
+void Window::InitTimer()
+{
+  glfwSetTime(0.0);
+  previousTime = 0.0;
+  deltaTime = 0.0;
+}
+
+/**
+* タイマーを更新する.
+*
+* @sa InitTimer, GetDeltaTime
+*/
+void Window::UpdateTimer()
+{
+  // 経過時間を計測.
+  const double currentTime = glfwGetTime();
+  deltaTime = currentTime - previousTime;
+  previousTime = currentTime;
+
+  // 経過時間が長くなりすぎないように調整.
+  const float upperLimit = 0.25f; // 経過時間として許容される上限.
+  if (deltaTime > upperLimit) {
+    deltaTime = 0.1f;
+  }
+}
+
+/**
+* 経過時間を取得する.
+*
+* @return 直前の2回のUpdateTimer()呼び出しの間に経過した時間.
+*
+* @sa InitTimer, UpdateTimer
+*/
+double Window::DeltaTime() const
+{
+  return deltaTime;
+}
+
+/**
+*
+*/
+glm::vec2 Window::GetMousePosition() const
+{
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+  return glm::vec2(x, y);
+}
+
+/**
+*
+*/
+int Window::GetMouseButton(int button) const
+{
+  return glfwGetMouseButton(window, button);
 }
 
 } // namespace GLFWEW
