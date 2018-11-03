@@ -280,12 +280,16 @@ int main()
   lights.directional.color = glm::vec3(1, 1, 1);
   lights.point.position[0] = glm::vec3(5, 4, 0);
   lights.point.color[0] = glm::vec3(1.0f, 0.8f, 0.4f) * 100.0f;
-  lights.spot.posAndInnerCutOff[0] = glm::vec4(-10, 4, 0, std::cos(glm::radians(15.0f)));
-  lights.spot.dirAndCutOff[0] = glm::vec4(glm::normalize(glm::vec3(2, -1, -2)), std::cos(glm::radians(20.0f)));
+  lights.spot.posAndInnerCutOff[0] = glm::vec4(-6, 6, 8, std::cos(glm::radians(15.0f)));
+  lights.spot.dirAndCutOff[0] = glm::vec4(glm::normalize(glm::vec3(-1,-2,-2)), std::cos(glm::radians(20.0f)));
   lights.spot.color[0] = glm::vec3(0.4f, 0.8f, 1.0f) * 200.0f;
 
   // メインループ.
+  window.InitTimer();
   while (!window.ShouldClose()) {
+    window.UpdateTimer();
+    const float deltaTime = (float)window.DeltaTime();
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glEnable(GL_CULL_FACE);
@@ -294,23 +298,8 @@ int main()
     glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // 視点を回転移動させる.
-    static float degree = 0.0f;
-    degree += 0.01f;
-    if (degree >= 360.0f) { degree -= 360.0f; }
-    const glm::vec3 viewPos = glm::rotate(glm::mat4(1), glm::radians(degree), glm::vec3(0, 1, 0)) * glm::vec4(-20, 30, -30, 1);
-
-    // ポイント・ライトを移動させる.
-    if (window.GetKey(GLFW_KEY_LEFT) == GLFW_PRESS) {
-      lights.point.position[0].x -= 0.05f;
-    } else if (window.GetKey(GLFW_KEY_RIGHT) == GLFW_PRESS) {
-      lights.point.position[0].x += 0.05f;
-    }
-    if (window.GetKey(GLFW_KEY_UP) == GLFW_PRESS) {
-      lights.point.position[0].z -= 0.05f;
-    } else if (window.GetKey(GLFW_KEY_DOWN) == GLFW_PRESS) {
-      lights.point.position[0].z += 0.05f;
-    }
+    // 視点を設定する.
+    const glm::vec3 viewPos(20, 30, 30);
 
     progFragmentLighting.Use();
 
@@ -348,14 +337,40 @@ int main()
     progSimple.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
     // ポイント・ライトの位置が分かるように適当なモデルを表示.
-    progSimple.BindTexture(0, texId);
-    static float pointLightAngle = 0;
-    pointLightAngle += glm::radians(1.0f);
-    if (pointLightAngle > glm::radians(360.0f)) {
-      pointLightAngle -= glm::radians(360.0f);
-    }
-    for (int i = 0; i < 8; ++i) {
-      progSimple.Draw(meshList[0], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
+    {
+      // 0番のポイント・ライトを移動する.
+      const float speed = 10.0f * deltaTime;
+      if (window.IsKeyPressed(GLFW_KEY_A)) {
+        lights.point.position[0].x -= speed;
+      } else if (window.IsKeyPressed(GLFW_KEY_D)) {
+        lights.point.position[0].x += speed;
+      }
+      if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+        if (window.IsKeyPressed(GLFW_KEY_W)) {
+          lights.point.position[0].y += speed;
+        } else if (window.IsKeyPressed(GLFW_KEY_S)) {
+          lights.point.position[0].y -= speed;
+        }
+      } else {
+        if (window.IsKeyPressed(GLFW_KEY_W)) {
+          lights.point.position[0].z -= speed;
+        } else if (window.IsKeyPressed(GLFW_KEY_S)) {
+          lights.point.position[0].z += speed;
+        }
+      }
+
+      // モデルのY軸回転角を更新.
+      static float pointLightAngle = 0;
+      pointLightAngle += glm::radians(1.0f);
+      if (pointLightAngle > glm::radians(360.0f)) {
+        pointLightAngle -= glm::radians(360.0f);
+      }
+
+      // ポイント・ライトの位置が分かるように適当なモデルを表示.
+      progSimple.BindTexture(0, texId);
+      for (int i = 0; i < 8; ++i) {
+        progSimple.Draw(meshList[0], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
+      }
     }
 
     glActiveTexture(GL_TEXTURE0);
