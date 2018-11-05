@@ -1,10 +1,8 @@
 /**
 * @file Shader.cpp
 */
-#define GLM_ENABLE_EXPERIMENTAL
 #include "Shader.h"
 #include "Geometry.h"
-#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <iostream>
