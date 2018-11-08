@@ -197,6 +197,8 @@ GLuint CreateVAO(GLuint vbo, GLuint ibo)
   glEnableVertexAttribArray(3);
   glVertexAttribPointer(3, sizeof(Vertex::normal) / sizeof(float), GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
   glBindVertexArray(0);
+  glDeleteBuffers(1, &ibo);
+  glDeleteBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   return vao;
@@ -227,42 +229,26 @@ bool MeshList::Allocate()
 {
   Free();
 
-  meshes.reserve(1'000);
+  meshes.reserve(100);
+  tmpVertices.reserve(10'000);
+  tmpIndices.reserve(10'000);
 
-  vbo = CreateVBO(100'000 * sizeof(Vertex), nullptr);
-  ibo = CreateIBO(100'000 * sizeof(GLushort), nullptr);
+  Add(std::begin(Model::Tree::vertices), std::end(Model::Tree::vertices), std::begin(Model::Tree::indices), std::end(Model::Tree::indices));
+  Add(std::begin(Model::House::vertices), std::end(Model::House::vertices), std::begin(Model::House::indices), std::end(Model::House::indices));
+  Add(std::begin(Model::Rock::vertices), std::end(Model::Rock::vertices), std::begin(Model::Rock::indices), std::end(Model::Rock::indices));
+  Add(std::begin(Model::Ground::vertices), std::end(Model::Ground::vertices), std::begin(Model::Ground::indices), std::end(Model::Ground::indices));
+
+  GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
+  GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
   vao = CreateVAO(vbo, ibo);
+
+  std::vector<Vertex>().swap(tmpVertices);
+  std::vector<GLushort>().swap(tmpIndices);
+
   if (!vbo || !ibo || !vao) {
     std::cerr << "ERROR: VAOの作成に失敗.\n";
     return false;
   }
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-
-  meshes.push_back({ GL_TRIANGLES, sizeof(Model::Tree::indices) / sizeof(GLushort), (const GLvoid*)iboEnd, (GLint)(vboEnd / sizeof(Vertex)) });
-  glBufferSubData(GL_ARRAY_BUFFER, vboEnd, sizeof(Model::Tree::vertices), Model::Tree::vertices);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, iboEnd, sizeof(Model::Tree::indices), Model::Tree::indices);
-  vboEnd += sizeof(Model::Tree::vertices);
-  iboEnd += sizeof(Model::Tree::indices);
-
-  meshes.push_back({ GL_TRIANGLES, sizeof(Model::House::indices) / sizeof(GLushort), (const GLvoid*)iboEnd, (GLint)(vboEnd / sizeof(Vertex)) });
-  glBufferSubData(GL_ARRAY_BUFFER, vboEnd, sizeof(Model::House::vertices), Model::House::vertices);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, iboEnd, sizeof(Model::House::indices), Model::House::indices);
-  vboEnd += sizeof(Model::House::vertices);
-  iboEnd += sizeof(Model::House::indices);
-
-  meshes.push_back({ GL_TRIANGLES, sizeof(Model::Rock::indices) / sizeof(GLushort), (const GLvoid*)iboEnd, (GLint)(vboEnd / sizeof(Vertex)) });
-  glBufferSubData(GL_ARRAY_BUFFER, vboEnd, sizeof(Model::Rock::vertices), Model::Rock::vertices);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, iboEnd, sizeof(Model::Rock::indices), Model::Rock::indices);
-  vboEnd += sizeof(Model::Rock::vertices);
-  iboEnd += sizeof(Model::Rock::indices);
-
-  meshes.push_back({ GL_TRIANGLES, sizeof(Model::Ground::indices) / sizeof(GLushort), (const GLvoid*)iboEnd, (GLint)(vboEnd / sizeof(Vertex)) });
-  glBufferSubData(GL_ARRAY_BUFFER, vboEnd, sizeof(Model::Ground::vertices), Model::Ground::vertices);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, iboEnd, sizeof(Model::Ground::indices), Model::Ground::indices);
-  vboEnd += sizeof(Model::Ground::vertices);
-  iboEnd += sizeof(Model::Ground::indices);
 
   return true;
 }
@@ -272,22 +258,30 @@ bool MeshList::Allocate()
 */
 void MeshList::Free()
 {
-  if (vao) {
-    glDeleteVertexArrays(1, &vao);
-    vao = 0;
-  }
-  if (ibo) {
-    glDeleteBuffers(1, &ibo);
-    ibo = 0;
-  }
-  if (vbo) {
-    glDeleteBuffers(1, &vbo);
-    vbo = 0;
-  }
+  glDeleteVertexArrays(1, &vao);
+  vao = 0;
+  std::vector<Mesh>().swap(meshes);
+}
 
-  vboEnd = 0;
-  iboEnd = 0;
-  meshes.clear();
+/**
+* メッシュを追加する.
+*
+* @param vBegin  頂点データのポインタ.
+* @param vEnd    頂点データの終端のポインタ.
+* @param iBegin  インデックスデータのポインタ.
+* @param iEnd    インデックスデータの終端のポインタ.
+*/
+void MeshList::Add(const Vertex* vBegin, const Vertex* vEnd, const GLushort* iBegin, const GLushort* iEnd)
+{
+  Mesh m;
+  m.mode = GL_TRIANGLES;
+  m.count = iEnd - iBegin;
+  m.indices = (const GLvoid*)(tmpIndices.size() * sizeof(GLushort));
+  m.baseVertex = (GLint)tmpVertices.size();
+  meshes.push_back(m);
+
+  tmpVertices.insert(tmpVertices.end(), vBegin, vEnd);
+  tmpIndices.insert(tmpIndices.end(), iBegin, iEnd);
 }
 
 /**
