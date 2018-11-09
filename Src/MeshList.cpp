@@ -1,9 +1,12 @@
 /**
 * @file MeshList.cpp
 */
+#define _CRT_SECURE_NO_WARNINGS
 #include "MeshList.h"
 #include "Geometry.h"
+#include <fstream>
 #include <iostream>
+#include <string>
 
 // 木のモデル.
 const Vertex vTree[] = {
@@ -211,7 +214,7 @@ bool MeshList::Allocate()
   tmpVertices.reserve(10'000);
   tmpIndices.reserve(10'000);
 
-  Add(std::begin(vTree), std::end(vTree), std::begin(iTree), std::end(iTree));
+  AddFromObjFile("Res/Tree.obj");
   Add(std::begin(vHouse), std::end(vHouse), std::begin(iHouse), std::end(iHouse));
   Add(std::begin(vRock), std::end(vRock), std::begin(iRock), std::end(iRock));
   Add(std::begin(vGround), std::end(vGround), std::begin(iGround), std::end(iGround));
@@ -260,6 +263,83 @@ void MeshList::Add(const Vertex* vBegin, const Vertex* vEnd, const GLushort* iBe
 
   tmpVertices.insert(tmpVertices.end(), vBegin, vEnd);
   tmpIndices.insert(tmpIndices.end(), iBegin, iEnd);
+}
+
+/**
+* OBJファイルからメッシュを読み込む.
+*
+* @param path 読み込むOBJファイルのパス.
+*
+* @retval true  読み込み成功.
+* @retval false 読み込み失敗.
+*/
+bool MeshList::AddFromObjFile(const char* path)
+{
+  // ファイルを開く.
+  std::ifstream ifs(path);
+  if (!ifs.is_open()) {
+    std::cerr << "ERROR: " << path << "を開けません\n";
+    return false;
+  }
+
+  // データ読み取り用の変数を準備.
+  struct IndexSet {
+    int position;
+    int texCoord;
+    int normal;
+  };
+  std::vector<IndexSet> indexSetList;
+  std::vector<Vector3> positionList;
+  std::vector<Vector2> texCoordList;
+  std::vector<Vector3> normalList;
+  indexSetList.reserve(1000);
+  positionList.reserve(1000);
+  texCoordList.reserve(1000);
+  normalList.reserve(1000);
+
+  // ファイルからモデルのデータを読み込む.
+  while (!ifs.eof()) {
+    std::string line;
+    getline(ifs, line);
+    if (line[0] == '#') {
+      continue;
+    }
+    float x, y, z;
+    int a[3], b[3], c[3];
+    if (sscanf(line.data(), "v %f %f %f", &x, &y, &z) == 3) {
+      positionList.push_back(Vector3{ x, y, z });
+    } else if (sscanf(line.data(), "vt %f %f", &x, &y) == 2) {
+      texCoordList.push_back(Vector2{ x, y });
+    } else if (sscanf(line.data(), "vn %f %f %f", &x, &y, &z) == 3) {
+      normalList.push_back(Vector3{ x, y, z });
+    } else if (sscanf(line.data(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &a[0], &a[1], &a[2], &b[0], &b[1], &b[2], &c[0], &c[1], &c[2]) == 9) {
+      indexSetList.push_back(IndexSet{ a[0], a[1], a[2] });
+      indexSetList.push_back(IndexSet{ b[0], b[1], b[2] });
+      indexSetList.push_back(IndexSet{ c[0], c[1], c[2] });
+    }
+  }
+
+  // 頂点データとインデックスデータ用の変数を準備.
+  std::vector<Vertex> vertices;
+  std::vector<GLushort> indices;
+  vertices.reserve(positionList.size());
+  indices.reserve(indexSetList.size());
+
+  // モデルのデータを頂点データとインデックスデータに変換する.
+  for (size_t i = 0; i < indexSetList.size(); ++i) {
+    indices.push_back((GLushort)vertices.size());
+
+    Vertex v;
+    v.position = positionList[indexSetList[i].position - 1];
+    v.color = Color{ 1,1,1,1 };
+    v.texCoord = texCoordList[indexSetList[i].texCoord - 1];
+    v.normal = normalList[indexSetList[i].normal - 1];
+    vertices.push_back(v);
+  }
+
+  Add(vertices.data(), vertices.data() + vertices.size(), indices.data(), indices.data() + indices.size());
+
+  return true;
 }
 
 /**

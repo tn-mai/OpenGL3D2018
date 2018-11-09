@@ -23,6 +23,7 @@ public:
   bool Allocate();
   void Free();
   void Add(const Vertex* vBegin, const Vertex* vEnd, const GLushort* iBegin, const GLushort* iEnd);
+  bool AddFromObjFile(const char* filename);
 
   void BindVertexArray();
   const Mesh& operator[](size_t index) const;
