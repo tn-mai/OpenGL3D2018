@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <vector>
 
+struct Vertex;
 struct Mesh;
 
 /**
@@ -21,19 +22,17 @@ public:
 
   bool Allocate();
   void Free();
+  void Add(const Vertex* vBegin, const Vertex* vEnd, const GLushort* iBegin, const GLushort* iEnd);
 
   void BindVertexArray();
   const Mesh& operator[](size_t index) const;
 
 private:
-  GLuint vbo = 0;
-  GLuint ibo = 0;
   GLuint vao = 0;
-
-  GLintptr vboEnd = 0;
-  GLintptr iboEnd = 0;
-
   std::vector<Mesh> meshes;
+
+  std::vector<Vertex> tmpVertices;
+  std::vector<GLushort> tmpIndices;
 };
 
 #endif // MESHLIST_H_INCLUDED
