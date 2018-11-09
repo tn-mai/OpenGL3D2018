@@ -5,15 +5,8 @@
 #include "Geometry.h"
 #include <iostream>
 
-/**
-* モデルデータを格納する名前空間.
-*/
-namespace Model {
-
 // 木のモデル.
-namespace Tree {
-
-const Vertex vertices[] = {
+const Vertex vTree[] = {
   { { 0.00f, 5.0f, 0.00f}, {0.5f, 0.8f, 0.3f, 1.0f}, { 0.0f, 0.0f }, { 0.00f, 1.00f, 0.00f } },
   { { 0.00f, 1.5f,-1.10f}, {0.1f, 0.3f, 0.0f, 1.0f}, { 0.0f, 0.0f }, { 0.00f,-0.49f,-0.87f } },
   { {-0.75f, 1.5f, 0.40f}, {0.1f, 0.3f, 0.0f, 1.0f}, { 0.0f, 0.0f }, {-0.76f,-0.49f, 0.43f } },
@@ -24,17 +17,13 @@ const Vertex vertices[] = {
   { { 0.25f, 0.0f, 0.13f}, {0.5f, 0.3f, 0.2f, 1.0f}, { 0.0f, 0.0f }, { 0.76f,-0.49f, 0.43f } },
 };
 
-const GLushort indices[] = {
+const GLushort iTree[] = {
   0, 1, 2, 0, 2, 3, 0, 3, 1, 1, 2, 3,
   4, 5, 6, 4, 6, 7, 4, 7, 5,
 };
 
-} // namespace Tree
-
 // 家のモデル.
-namespace House {
-
-const Vertex vertices[] = {
+const Vertex vHouse[] = {
   { { 2.8f, 0.0f, 3.0f}, {0.4f, 0.3f, 0.2f, 1.0f}, { 1.000f, 0.00f }, { 0.71f, 0.0f, 0.71f } },
   { { 3.0f, 4.0f, 3.0f}, {0.6f, 0.5f, 0.3f, 1.0f}, { 1.000f, 0.69f }, { 0.71f, 0.0f, 0.71f } },
   { { 0.0f, 6.0f, 3.0f}, {0.5f, 0.4f, 0.2f, 1.0f}, { 0.875f, 1.00f }, { 0.00f, 0.0f, 1.00f } },
@@ -55,7 +44,7 @@ const Vertex vertices[] = {
   { { 0.0f, 6.0f,-3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.250f, 1.00f }, { 0.00f, 1.0f, 0.00f } },
   { { 0.0f, 6.0f, 3.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.000f, 1.00f }, { 0.00f, 1.0f, 0.00f } }, };
 
-const GLushort indices[] = {
+const GLushort iHouse[] = {
   0, 1, 3, 3, 4, 0, 1, 2, 3,
   5, 6, 8, 8, 9, 5, 6, 7, 8,
   9, 8, 11, 11, 10, 9,
@@ -63,12 +52,9 @@ const GLushort indices[] = {
   3, 12, 13, 13, 6, 3,
   8, 14, 15, 15, 11, 8,
 };
-} // namespace House
-
 // 岩のモデル.
-namespace Rock {
 
-const Vertex vertices[] = {
+const Vertex vRock[] = {
   { { 0.8f, 0.8f, 0.8f}, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f }, { 0.58f, 0.58f, 0.58f } },
   { { 0.8f, 1.0f,-0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.5f, 0.5f }, { 0.58f, 0.58f,-0.58f } },
   { {-0.8f, 1.2f,-0.8f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.5f }, {-0.58f, 0.58f,-0.58f } },
@@ -80,7 +66,7 @@ const Vertex vertices[] = {
   { {-1.4f, 0.0f, 0.6f}, {1.0f, 1.0f, 1.0f, 1.0f}, { 0.0f, 0.0f }, {-0.71f, 0.0f, 0.71f } },
 };
 
-const GLushort indices[] = {
+const GLushort iRock[] = {
   0, 1, 2, 2, 3, 0,
   4, 5, 1, 1, 0, 4,
   5, 6, 2, 2, 1, 5,
@@ -88,12 +74,8 @@ const GLushort indices[] = {
   7, 4, 0, 0, 3, 7,
 };
 
-} // namespace Rock
-
 // 地面のモデル.
-namespace Ground {
-
-const Vertex vertices[] = {
+const Vertex vGround[] = {
   { {-20.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, {  0.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
   { {-10.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, {  5.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
   { {  0.0f, 0.0f, 20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 10.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
@@ -125,16 +107,12 @@ const Vertex vertices[] = {
   { { 20.0f, 0.0f,-20.0f}, {0.8f, 0.8f, 0.8f, 1.0f}, { 20.0f, 20.0f }, { 0.0f, 1.0f, 0.0f } },
 };
 
-const GLushort indices[] = {
+const GLushort iGround[] = {
   0, 1, 6, 6, 5, 0, 1, 2, 7, 7, 6, 1, 2, 3, 8, 8, 7, 2, 3, 4, 9, 9, 8, 3,
   5, 6, 11, 11, 10, 5, 6, 7, 12, 12, 11, 6, 7, 8, 13, 13, 12, 7, 8, 9, 14, 14, 13, 8,
   10, 11, 16, 16, 15, 10, 11, 12, 17, 17, 16, 11, 12, 13, 18, 18, 17, 12, 13, 14, 19, 19, 18, 13,
   15, 16, 21, 21, 20, 15, 16, 17, 22, 22, 21, 16, 17, 18, 23, 23, 22, 17, 18, 19, 24, 24, 23, 18,
 };
-
-} // namespace Ground
-
-} // namespace Model
 
 /**
 * Vertex Buffer Objectを作成する.
@@ -233,10 +211,10 @@ bool MeshList::Allocate()
   tmpVertices.reserve(10'000);
   tmpIndices.reserve(10'000);
 
-  Add(std::begin(Model::Tree::vertices), std::end(Model::Tree::vertices), std::begin(Model::Tree::indices), std::end(Model::Tree::indices));
-  Add(std::begin(Model::House::vertices), std::end(Model::House::vertices), std::begin(Model::House::indices), std::end(Model::House::indices));
-  Add(std::begin(Model::Rock::vertices), std::end(Model::Rock::vertices), std::begin(Model::Rock::indices), std::end(Model::Rock::indices));
-  Add(std::begin(Model::Ground::vertices), std::end(Model::Ground::vertices), std::begin(Model::Ground::indices), std::end(Model::Ground::indices));
+  Add(std::begin(vTree), std::end(vTree), std::begin(iTree), std::end(iTree));
+  Add(std::begin(vHouse), std::end(vHouse), std::begin(iHouse), std::end(iHouse));
+  Add(std::begin(vRock), std::end(vRock), std::begin(iRock), std::end(iRock));
+  Add(std::begin(vGround), std::end(vGround), std::begin(iGround), std::end(iGround));
 
   GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
   GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
