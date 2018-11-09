@@ -320,21 +320,43 @@ bool MeshList::AddFromObjFile(const char* path)
   }
 
   // 頂点データとインデックスデータ用の変数を準備.
+  std::vector<IndexSet> indexSetPerVertex;
   std::vector<Vertex> vertices;
   std::vector<GLushort> indices;
+  indexSetPerVertex.reserve(positionList.size());
   vertices.reserve(positionList.size());
   indices.reserve(indexSetList.size());
 
   // モデルのデータを頂点データとインデックスデータに変換する.
   for (size_t i = 0; i < indexSetList.size(); ++i) {
-    indices.push_back((GLushort)vertices.size());
+    int existingIndex = -1;
+    for (size_t n = 0; n < indexSetPerVertex.size(); ++n) {
+      if (indexSetPerVertex[n].position == indexSetList[i].position &&
+        indexSetPerVertex[n].texCoord == indexSetList[i].texCoord &&
+        indexSetPerVertex[n].normal == indexSetList[i].normal) {
+        existingIndex = n;
+        break;
+      }
+    }
 
-    Vertex v;
-    v.position = positionList[indexSetList[i].position - 1];
-    v.color = Color{ 1,1,1,1 };
-    v.texCoord = texCoordList[indexSetList[i].texCoord - 1];
-    v.normal = normalList[indexSetList[i].normal - 1];
-    vertices.push_back(v);
+    if (existingIndex >= 0) {
+      indices.push_back((GLushort)existingIndex);
+    } else {
+      indices.push_back((GLushort)vertices.size());
+
+      Vertex v;
+      v.position = positionList[indexSetList[i].position - 1];
+      v.color = Color{ 1,1,1,1 };
+      v.texCoord = texCoordList[indexSetList[i].texCoord - 1];
+      v.normal = normalList[indexSetList[i].normal - 1];
+      vertices.push_back(v);
+      indexSetPerVertex.push_back(indexSetList[i]);
+    }
+
+    if (vertices.size() >= USHRT_MAX - 1) {
+      std::cerr << "WARNING: " << path << "の頂点数はGLushortで扱える範囲を超過しています.\n";
+      break;
+    }
   }
 
   Add(vertices.data(), vertices.data() + vertices.size(), indices.data(), indices.data() + indices.size());
