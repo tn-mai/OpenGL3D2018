@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <math.h>
 
 // –Ø‚Ìƒ‚ƒfƒ‹.
 const Vertex vTree[] = {
@@ -311,7 +312,8 @@ bool MeshList::AddFromObjFile(const char* path)
     } else if (sscanf(line.data(), "vt %f %f", &x, &y) == 2) {
       texCoordList.push_back(Vector2{ x, y });
     } else if (sscanf(line.data(), "vn %f %f %f", &x, &y, &z) == 3) {
-      normalList.push_back(Vector3{ x, y, z });
+      const float length = std::sqrt(x * x + y * y + z * z);
+      normalList.push_back(Vector3{ x / length, y / length, z / length });
     } else if (sscanf(line.data(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &a[0], &a[1], &a[2], &b[0], &b[1], &b[2], &c[0], &c[1], &c[2]) == 9) {
       indexSetList.push_back(IndexSet{ a[0], a[1], a[2] });
       indexSetList.push_back(IndexSet{ b[0], b[1], b[2] });
