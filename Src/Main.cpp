@@ -59,20 +59,35 @@ int main()
   // テクスチャを作成する.
   const int imageWidth = 8; // 画像の幅.
   const int imageHeight = 8; // 画像の高さ.
-  const GLuint B = 0xff'00'00'00; // 黒.
+  const GLuint B = 0xff'40'40'40; // 黒.
   const GLuint W = 0xff'ff'ff'ff; // 白.
   const GLuint imageData[imageWidth * imageHeight] = {
     W, W, B, W, W, W, W, W,
     W, W, B, W, W, W, W, W,
     W, W, B, W, W, W, W, W,
     B, B, B, B, B, B, B, B,
-
     W, W, W, W, W, W, B, W,
     W, W, W, W, W, W, B, W,
     W, W, W, W, W, W, B, W,
     B, B, B, B, B, B, B, B,
   };
+  const GLuint G2 = 0xff'10'80'20;
+  const GLuint G1 = 0xff'20'C0'40;
+  const GLuint G0 = 0xff'40'E0'80;
+  const GLuint R0 = 0xff'20'60'A0;
+  const GLuint R1 = 0xff'10'20'60;
+  const GLuint imageTree[imageWidth * imageHeight] = {
+    R0,R1,R0,R1,R0,R1,R0,R1,
+    R0,R0,R0,R0,R0,R0,R0,R0,
+    G2,G1,G2,G1,G2,G1,G2,G1,
+    G1,G2,G1,G2,G1,G2,G1,G2,
+    G1,G1,G2,G1,G1,G1,G2,G1,
+    G0,G1,G0,G1,G0,G1,G0,G1,
+    G1,G0,G1,G0,G1,G0,G1,G0,
+    G0,G0,G0,G0,G0,G0,G0,G0,
+  };
   GLuint texId = Texture::CreateImage2D(imageWidth, imageHeight, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
+  GLuint texTree = Texture::CreateImage2D(imageWidth, imageHeight, imageTree, GL_RGBA, GL_UNSIGNED_BYTE);
   GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
   GLuint texRock = Texture::LoadImage2D("Res/Rock.tga");
 
@@ -116,7 +131,7 @@ int main()
 
     meshList.BindVertexArray();
 
-    progFragmentLighting.BindTexture(0, texId);
+    progFragmentLighting.BindTexture(0, texTree);
 
     const float treeCount = 10; // 木を植える本数.
     const float radius = 8; //　半径.
@@ -127,6 +142,7 @@ int main()
       progFragmentLighting.Draw(meshList[0], glm::vec3(x, 0, z), glm::vec3(0, theta * 5, 0), glm::vec3(1));
     }
 
+    progFragmentLighting.BindTexture(0, texId);
     progFragmentLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
 
     progSimple.Use();
