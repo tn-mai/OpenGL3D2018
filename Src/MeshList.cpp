@@ -215,7 +215,7 @@ bool MeshList::Allocate()
   tmpIndices.reserve(10'000);
 
   AddFromObjFile("Res/Tree.obj");
-  Add(std::begin(vHouse), std::end(vHouse), std::begin(iHouse), std::end(iHouse));
+  AddFromObjFile("Res/House.obj");
   Add(std::begin(vRock), std::end(vRock), std::begin(iRock), std::end(iRock));
   Add(std::begin(vGround), std::end(vGround), std::begin(iGround), std::end(iGround));
 
