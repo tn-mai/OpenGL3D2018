@@ -202,6 +202,7 @@ int main()
 
   glDeleteTextures(1, &texRock);
   glDeleteTextures(1, &texHouse);
+  glDeleteTextures(1, &texTree);
   glDeleteTextures(1, &texId);
 
   return 0;
