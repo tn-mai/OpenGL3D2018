@@ -145,15 +145,16 @@ int main()
     progFragmentLighting.BindTexture(0, texId);
     progFragmentLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
 
+    progFragmentLighting.BindTexture(0, texHouse);
+    progFragmentLighting.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
+    progFragmentLighting.Draw(meshList[1], glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
+    progFragmentLighting.Draw(meshList[1], glm::vec3(0, 0,-15), glm::vec3(0), glm::vec3(1));
+
+    progFragmentLighting.BindTexture(0, texRock);
+    progFragmentLighting.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
+
     progSimple.Use();
     progSimple.SetViewProjectionMatrix(matProj * matView);
-
-    progSimple.BindTexture(0, texHouse);
-    progSimple.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
-    progSimple.Draw(meshList[1], glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
-    progSimple.Draw(meshList[1], glm::vec3(0, 0,-15), glm::vec3(0), glm::vec3(1));
-    progSimple.BindTexture(0, texRock);
-    progSimple.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
     // ポイント・ライトの位置が分かるように適当なモデルを表示.
     {
