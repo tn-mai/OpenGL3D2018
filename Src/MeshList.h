@@ -4,10 +4,8 @@
 #ifndef MESHLIST_H_INCLUDED
 #define MESHLIST_H_INCLUDED
 #include <GL/glew.h>
+#include "Geometry.h"
 #include <vector>
-
-struct Vertex;
-struct Mesh;
 
 /**
 * メッシュ管理クラス.

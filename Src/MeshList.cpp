@@ -1,13 +1,12 @@
 /**
 * @file MeshList.cpp
 */
-#define _CRT_SECURE_NO_WARNINGS
 #include "MeshList.h"
-#include "Geometry.h"
 #include <fstream>
-#include <iostream>
 #include <string>
+#include <stdio.h>
 #include <math.h>
+#include <iostream>
 
 // 木のモデル.
 const Vertex vTree[] = {
@@ -278,22 +277,22 @@ bool MeshList::AddFromObjFile(const char* path)
 {
   // ファイルを開く.
   std::ifstream ifs(path);
-  if (!ifs.is_open()) {
+  if (!ifs) {
     std::cerr << "ERROR: " << path << "を開けません\n";
     return false;
   }
 
   // データ読み取り用の変数を準備.
-  struct IndexSet {
-    int position;
-    int texCoord;
-    int normal;
+  struct Face {
+    int v;
+    int vt;
+    int vn;
   };
-  std::vector<IndexSet> indexSetList;
+  std::vector<Face> faceList;
   std::vector<Vector3> positionList;
   std::vector<Vector2> texCoordList;
   std::vector<Vector3> normalList;
-  indexSetList.reserve(1000);
+  faceList.reserve(1000);
   positionList.reserve(1000);
   texCoordList.reserve(1000);
   normalList.reserve(1000);
@@ -305,54 +304,90 @@ bool MeshList::AddFromObjFile(const char* path)
     if (line[0] == '#') {
       continue;
     }
-    float x, y, z;
-    int a[3], b[3], c[3];
-    if (sscanf(line.data(), "v %f %f %f", &x, &y, &z) == 3) {
-      positionList.push_back(Vector3{ x, y, z });
-    } else if (sscanf(line.data(), "vt %f %f", &x, &y) == 2) {
-      texCoordList.push_back(Vector2{ x, y });
-    } else if (sscanf(line.data(), "vn %f %f %f", &x, &y, &z) == 3) {
-      const float length = std::sqrt(x * x + y * y + z * z);
-      normalList.push_back(Vector3{ x / length, y / length, z / length });
-    } else if (sscanf(line.data(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &a[0], &a[1], &a[2], &b[0], &b[1], &b[2], &c[0], &c[1], &c[2]) == 9) {
-      indexSetList.push_back(IndexSet{ a[0], a[1], a[2] });
-      indexSetList.push_back(IndexSet{ b[0], b[1], b[2] });
-      indexSetList.push_back(IndexSet{ c[0], c[1], c[2] });
+    Vector3 v;
+    Vector2 vt;
+    Vector3 vn;
+    Face f[3];
+    if (sscanf_s(line.data(), "v %f %f %f", &v.x, &v.y, &v.z) == 3) {
+      positionList.push_back(v);
+    } else if (sscanf_s(line.data(), "vt %f %f", &vt.x, &vt.y) == 2) {
+      texCoordList.push_back(vt);
+    } else if (sscanf_s(line.data(), "vn %f %f %f", &vn.x, &vn.y, &vn.z) == 3) {
+      const float length = sqrt(vn.x * vn.x + vn.y * vn.y + vn.z * vn.z);
+      normalList.push_back(Vector3{ vn.x / length, vn.y / length, vn.z / length });
+    } else if (sscanf_s(line.data(), "f %d/%d/%d %d/%d/%d %d/%d/%d",
+      &f[0].v, &f[0].vt, &f[0].vn,
+      &f[1].v, &f[1].vt, &f[1].vn,
+      &f[2].v, &f[2].vt, &f[2].vn) == 9) {
+      faceList.push_back(f[0]);
+      faceList.push_back(f[1]);
+      faceList.push_back(f[2]);
     }
   }
 
+  if (positionList.empty()) {
+    std::cerr << "WARNING: " << path << "には頂点座標の定義がありません.\n";
+    Add(nullptr, nullptr, nullptr, nullptr);
+    return false;
+  }
+  if (texCoordList.empty()) {
+    std::cerr << "WARNING: " << path << "にはテクスチャ座標の定義がありません.\n";
+    Add(nullptr, nullptr, nullptr, nullptr);
+    return false;
+  }
+  if (normalList.empty()) {
+    std::cerr << "WARNING: " << path << "には法線の定義がありません.\n";
+    Add(nullptr, nullptr, nullptr, nullptr);
+    return false;
+  }
+
   // 頂点データとインデックスデータ用の変数を準備.
-  std::vector<IndexSet> indexSetPerVertex;
+  std::vector<Face> faceToVertexList;
   std::vector<Vertex> vertices;
   std::vector<GLushort> indices;
-  indexSetPerVertex.reserve(positionList.size());
-  vertices.reserve(positionList.size());
-  indices.reserve(indexSetList.size());
+  faceToVertexList.reserve(faceList.size());
+  vertices.reserve(faceList.size());
+  indices.reserve(faceList.size());
 
   // モデルのデータを頂点データとインデックスデータに変換する.
-  for (size_t i = 0; i < indexSetList.size(); ++i) {
-    int existingIndex = -1;
-    for (size_t n = 0; n < indexSetPerVertex.size(); ++n) {
-      if (indexSetPerVertex[n].position == indexSetList[i].position &&
-        indexSetPerVertex[n].texCoord == indexSetList[i].texCoord &&
-        indexSetPerVertex[n].normal == indexSetList[i].normal) {
-        existingIndex = n;
+  for (size_t i = 0; i < faceList.size(); ++i) {
+    size_t n = 0;
+    for (; n < faceToVertexList.size(); ++n) {
+      if (faceToVertexList[n].v == faceList[i].v &&
+        faceToVertexList[n].vt == faceList[i].vt &&
+        faceToVertexList[n].vn == faceList[i].vn) {
         break;
       }
     }
 
-    if (existingIndex >= 0) {
-      indices.push_back((GLushort)existingIndex);
+    if (n < faceToVertexList.size()) {
+      indices.push_back((GLushort)n);
     } else {
       indices.push_back((GLushort)vertices.size());
 
-      Vertex v;
-      v.position = positionList[indexSetList[i].position - 1];
-      v.color = Color{ 1,1,1,1 };
-      v.texCoord = texCoordList[indexSetList[i].texCoord - 1];
-      v.normal = normalList[indexSetList[i].normal - 1];
-      vertices.push_back(v);
-      indexSetPerVertex.push_back(indexSetList[i]);
+      faceToVertexList.push_back(faceList[i]);
+
+      Vertex vertex;
+      int v  = faceList[i].v - 1;
+      if (v < 0 || v >= (int)positionList.size()) {
+        std::cerr << "WARNING: 不正なvインデックス(" << v << ")\n";
+        v = 0;
+      }
+      int vt = faceList[i].vt - 1;
+      if (vt < 0 || vt >= (int)texCoordList.size()) {
+        std::cerr << "WARNING: 不正なvtインデックス(" << vt << ")\n";
+        vt = 0;
+      }
+      int vn = faceList[i].vn - 1;
+      if (vn < 0 || vn >= (int)normalList.size()) {
+        std::cerr << "WARNING: 不正なvnインデックス(" << vn << ")\n";
+        vn = 0;
+      }
+      vertex.position = positionList[v];
+      vertex.color = { 1,1,1,1 };
+      vertex.texCoord = texCoordList[vt];
+      vertex.normal = normalList[vn];
+      vertices.push_back(vertex);
     }
 
     if (vertices.size() >= USHRT_MAX - 1) {
@@ -360,6 +395,8 @@ bool MeshList::AddFromObjFile(const char* path)
       break;
     }
   }
+
+  std::cout << "INFO: " << path << " [頂点数=" << vertices.size() << " インデックス数=" << indices.size() << "]\n";
 
   Add(vertices.data(), vertices.data() + vertices.size(), indices.data(), indices.data() + indices.size());
 
