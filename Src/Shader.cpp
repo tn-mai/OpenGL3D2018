@@ -276,7 +276,7 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
     glm::vec4 spotLightPosOnModel[4];
     glm::vec4 spotLightDirOnModel[4];
     for (int i = 0; i < 4; ++i) {
-      const glm::vec3 invDir = matInvModel * lights.spot.dirAndCutOff[i];
+      const glm::vec3 invDir = matInvRotate * lights.spot.dirAndCutOff[i];
       spotLightDirOnModel[i] = glm::vec4(invDir, lights.spot.dirAndCutOff[i].w);
       const glm::vec3 pos = lights.spot.posAndInnerCutOff[i];
       spotLightPosOnModel[i] = matInvModel * glm::vec4(pos, 1);
