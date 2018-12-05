@@ -130,8 +130,31 @@ GLuint BuildFromFile(const char* vsPath, const char* fsPath)
 *
 * @param id プログラム・オブジェクトのID.
 */
-Program::Program(GLuint id) : id(id)
+Program::Program(GLuint programId)
 {
+  Reset(programId);
+}
+
+/**
+*
+*/
+void Program::Reset(GLuint programId)
+{
+  glDeleteProgram(id);
+  id = programId;
+  if (id == 0) {
+    locMatMVP = -1;
+    locPointLightPos = -1;
+    locPointLightCol = -1;
+    locDirLightDir = -1;
+    locDirLightCol = -1;
+    locAmbLightCol = -1;
+    locSpotLightPos = -1;
+    locSpotLightDir = -1;
+    locSpotLightCol = -1;
+    return;
+  }
+
   locMatMVP = glGetUniformLocation(id, "matMVP");
   locPointLightPos = glGetUniformLocation(id, "pointLight.position");
   locPointLightCol = glGetUniformLocation(id, "pointLight.color");
@@ -240,6 +263,10 @@ void Program::SetViewProjectionMatrix(const glm::mat4& matVP)
 */
 void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, const glm::vec3& s)
 {
+  if (id == 0) {
+    return;
+  }
+
   // モデル行列を計算する.
   const glm::mat4 matScale = glm::scale(glm::mat4(1), s);
   const glm::mat4 matRotateX = glm::rotate(glm::mat4(1), r.x, glm::vec3(1, 0, 0));

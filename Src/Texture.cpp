@@ -123,8 +123,9 @@ GLuint LoadImage2D(const char* path)
 *
 * @param texId テクスチャID.
 */
-Image2D::Image2D(GLuint texId) : id(texId)
+Image2D::Image2D(GLuint texId)
 {
+  Reset(texId);
 }
 
 /**
@@ -132,9 +133,18 @@ Image2D::Image2D(GLuint texId) : id(texId)
 */
 Image2D::~Image2D()
 {
-  if (id > 0) {
-    glDeleteTextures(1, &id);
-  }
+  glDeleteTextures(1, &id);
+}
+
+/**
+* テクスチャIDを設定する.
+*
+* @param texId テクスチャID.
+*/
+void Image2D::Reset(GLuint texId)
+{
+  glDeleteTextures(1, &id);
+  id = texId;
 }
 
 /**

@@ -18,6 +18,7 @@ class Image2D
 public:
   explicit Image2D(GLuint texId);
   ~Image2D();
+  void Reset(GLuint texId);
   GLuint Get() const;
 
 private:
