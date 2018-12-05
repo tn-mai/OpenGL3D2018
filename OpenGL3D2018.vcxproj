@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\House.tga" />
+    <Image Include="Res\human.tga" />
     <Image Include="Res\Rock.tga" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\House.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\human.obj">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -218,6 +218,7 @@ bool MeshList::Allocate()
   AddFromObjFile("Res/House.obj");
   Add(std::begin(vRock), std::end(vRock), std::begin(iRock), std::end(iRock));
   Add(std::begin(vGround), std::end(vGround), std::begin(iGround), std::end(iGround));
+  AddFromObjFile("Res/human.obj");
 
   GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
   GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
