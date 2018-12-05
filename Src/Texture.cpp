@@ -118,4 +118,33 @@ GLuint LoadImage2D(const char* path)
   return CreateImage2D(width, height, buf.data(), format, type);
 }
 
+/**
+* コンストラクタ.
+*
+* @param texId テクスチャID.
+*/
+Image2D::Image2D(GLuint texId) : id(texId)
+{
+}
+
+/**
+* デストラクタ.
+*/
+Image2D::~Image2D()
+{
+  if (id > 0) {
+    glDeleteTextures(1, &id);
+  }
+}
+
+/**
+* テクスチャIDを取得する.
+*
+* @return テクスチャID.
+*/
+GLuint Image2D::Get() const
+{
+  return id;
+}
+
 } // namespace Texture

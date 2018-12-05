@@ -86,11 +86,11 @@ int main()
     G1,G0,G1,G0,G1,G0,G1,G0,
     G0,G0,G0,G0,G0,G0,G0,G0,
   };
-  GLuint texId = Texture::CreateImage2D(imageWidth, imageHeight, imageData, GL_RGBA, GL_UNSIGNED_BYTE);
-  GLuint texTree = Texture::CreateImage2D(imageWidth, imageHeight, imageTree, GL_RGBA, GL_UNSIGNED_BYTE);
-  GLuint texHouse = Texture::LoadImage2D("Res/House.tga");
-  GLuint texRock = Texture::LoadImage2D("Res/Rock.tga");
-  GLuint texHuman = Texture::LoadImage2D("Res/human.tga");
+  Texture::Image2D texId(Texture::CreateImage2D(imageWidth, imageHeight, imageData, GL_RGBA, GL_UNSIGNED_BYTE));
+  Texture::Image2D texTree(Texture::CreateImage2D(imageWidth, imageHeight, imageTree, GL_RGBA, GL_UNSIGNED_BYTE));
+  Texture::Image2D texHouse(Texture::LoadImage2D("Res/House.tga"));
+  Texture::Image2D texRock(Texture::LoadImage2D("Res/Rock.tga"));
+  Texture::Image2D texHuman(Texture::LoadImage2D("Res/human.tga"));
 
   // ライトの設定.
   Shader::LightList lights;
@@ -132,7 +132,7 @@ int main()
 
     meshList.BindVertexArray();
 
-    progFragmentLighting.BindTexture(0, texTree);
+    progFragmentLighting.BindTexture(0, texTree.Get());
 
     const float treeCount = 10; // 木を植える本数.
     const float radius = 8; //　半径.
@@ -143,18 +143,18 @@ int main()
       progFragmentLighting.Draw(meshList[0], glm::vec3(x, 0, z), glm::vec3(0, theta * 5, 0), glm::vec3(1));
     }
 
-    progFragmentLighting.BindTexture(0, texId);
+    progFragmentLighting.BindTexture(0, texId.Get());
     progFragmentLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
 
-    progFragmentLighting.BindTexture(0, texHouse);
+    progFragmentLighting.BindTexture(0, texHouse.Get());
     progFragmentLighting.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
     progFragmentLighting.Draw(meshList[1], glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
     progFragmentLighting.Draw(meshList[1], glm::vec3(0, 0,-15), glm::vec3(0), glm::vec3(1));
 
-    progFragmentLighting.BindTexture(0, texRock);
+    progFragmentLighting.BindTexture(0, texRock.Get());
     progFragmentLighting.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
-    progFragmentLighting.BindTexture(0, texHuman);
+    progFragmentLighting.BindTexture(0, texHuman.Get());
     progFragmentLighting.Draw(meshList[4], glm::vec3(8, 0, 8), glm::vec3(0, 3.14f, 0), glm::vec3(1));
 
     progSimple.Use();
@@ -191,7 +191,7 @@ int main()
       }
 
       // ポイント・ライトの位置が分かるように適当なモデルを表示.
-      progSimple.BindTexture(0, texId);
+      progSimple.BindTexture(0, texId.Get());
       for (int i = 0; i < 8; ++i) {
         progSimple.Draw(meshList[0], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
       }
@@ -204,12 +204,6 @@ int main()
 
     window.SwapBuffers();
   }
-
-  glDeleteTextures(1, &texHuman);
-  glDeleteTextures(1, &texRock);
-  glDeleteTextures(1, &texHouse);
-  glDeleteTextures(1, &texTree);
-  glDeleteTextures(1, &texId);
 
   return 0;
 }
