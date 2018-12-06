@@ -57,6 +57,8 @@ struct LightList
   DirectionalLight directional;
   PointLight point;
   SpotLight spot;
+
+  void Init();
 };
 
 /**
@@ -65,7 +67,7 @@ struct LightList
 class Program
 {
 public:
-  Program() = default;
+  Program();
   explicit Program(GLuint programId);
   ~Program();
 
