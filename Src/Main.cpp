@@ -90,7 +90,7 @@ int main()
   Texture::Image2D texTree(Texture::CreateImage2D(imageWidth, imageHeight, imageTree, GL_RGBA, GL_UNSIGNED_BYTE));
   Texture::Image2D texHouse(Texture::LoadImage2D("Res/House.tga"));
   Texture::Image2D texRock(Texture::LoadImage2D("Res/Rock.tga"));
-  Texture::Image2D texHuman(Texture::LoadImage2D("Res/human.tga"));
+  Texture::Image2D texHuman(Texture::LoadImage2D("Res/Human.tga"));
 
   // ƒ‰ƒCƒg‚Ìİ’è.
   Shader::LightList lights;

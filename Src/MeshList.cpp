@@ -218,7 +218,7 @@ bool MeshList::Allocate()
   AddFromObjFile("Res/House.obj");
   AddFromObjFile("Res/Rock.obj");
   AddFromObjFile("Res/Ground.obj");
-  AddFromObjFile("Res/human.obj");
+  AddFromObjFile("Res/Human.obj");
 
   GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
   GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
