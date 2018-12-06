@@ -67,6 +67,11 @@ GLuint LoadImage2D(const char* path)
   // TGAヘッダを読み込む.
   std::basic_ifstream<uint8_t> ifs;
   ifs.open(path, std::ios_base::binary);
+  if (!ifs) {
+    std::cerr << "WARNING: " << path << "を開けません.\n";
+    return 0;
+  }
+  std::cout << "INFO: " << path << "を読み込み中…";
   uint8_t tgaHeader[18];
   ifs.read(tgaHeader, 18);
 
@@ -91,6 +96,7 @@ GLuint LoadImage2D(const char* path)
 
   // 画像データが「上から下」で格納されている場合、上下を入れ替える.
   if (tgaHeader[17] & 0x20) {
+    std::cout << "反転中…";
     const int lineSize = width * pixelDepth / 8;
     std::vector<uint8_t> tmp(imageSize);
     std::vector<uint8_t>::iterator source = buf.begin();
@@ -102,6 +108,7 @@ GLuint LoadImage2D(const char* path)
     }
     buf.swap(tmp);
   }
+  std::cout << "完了\n";
 
   GLenum type = GL_UNSIGNED_BYTE;
   GLenum format = GL_BGRA;
