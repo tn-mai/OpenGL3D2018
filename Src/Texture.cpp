@@ -121,7 +121,7 @@ GLuint LoadImage2D(const char* path)
 /**
 * コンストラクタ.
 *
-* @param texId テクスチャID.
+* @param texId テクスチャ・オブジェクトのID.
 */
 Image2D::Image2D(GLuint texId)
 {
@@ -137,9 +137,9 @@ Image2D::~Image2D()
 }
 
 /**
-* テクスチャIDを設定する.
+* テクスチャ・オブジェクトを設定する.
 *
-* @param texId テクスチャID.
+* @param texId テクスチャ・オブジェクトのID.
 */
 void Image2D::Reset(GLuint texId)
 {
@@ -148,9 +148,20 @@ void Image2D::Reset(GLuint texId)
 }
 
 /**
-* テクスチャIDを取得する.
+* テクスチャ・オブジェクトが設定されているか調べる.
 *
-* @return テクスチャID.
+* @retval true  設定されている.
+* @retval false 設定されていない.
+*/
+bool Image2D::IsNull() const
+{
+  return id;
+}
+
+/**
+* テクスチャ・オブジェクトを取得する.
+*
+* @return テクスチャ・オブジェクトのID.
 */
 GLuint Image2D::Get() const
 {

@@ -69,6 +69,7 @@ public:
   ~Program();
 
   void Reset(GLuint programId);
+  bool IsNull() const;
   void Use();
   void BindVertexArray(GLuint);
   void BindTexture(GLuint, GLuint);

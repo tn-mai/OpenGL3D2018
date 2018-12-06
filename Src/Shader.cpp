@@ -136,7 +136,19 @@ Program::Program(GLuint programId)
 }
 
 /**
+* デストラクタ.
 *
+* プログラム・オブジェクトを削除する.
+*/
+Program::~Program()
+{
+  glDeleteProgram(id);
+}
+
+/**
+* プログラム・オブジェクトを設定する.
+*
+* @param id プログラム・オブジェクトのID.
 */
 void Program::Reset(GLuint programId)
 {
@@ -174,13 +186,14 @@ void Program::Reset(GLuint programId)
 }
 
 /**
-* デストラクタ.
+* プログラム・オブジェクトが設定されているか調べる.
 *
-* プログラム・オブジェクトを削除する.
+* @retval true  設定されている.
+* @retval false 設定されていない.
 */
-Program::~Program()
+bool Program::IsNull() const
 {
-  glDeleteProgram(id);
+  return id;
 }
 
 /**

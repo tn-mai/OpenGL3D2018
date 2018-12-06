@@ -19,6 +19,7 @@ public:
   explicit Image2D(GLuint texId);
   ~Image2D();
   void Reset(GLuint texId);
+  bool IsNull() const;
   GLuint Get() const;
 
 private:
