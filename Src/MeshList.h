@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include "Geometry.h"
 #include <vector>
+#include <string>
 
 /**
 * メッシュ管理クラス.
@@ -19,6 +20,7 @@ public:
   MeshList& operator=(const MeshList&) = default;
 
   bool Allocate();
+  bool Allocate(const std::vector<std::string>&);
   void Free();
   void Add(const Vertex* vBegin, const Vertex* vEnd, const GLushort* iBegin, const GLushort* iEnd);
   bool AddFromObjFile(const char* filename);

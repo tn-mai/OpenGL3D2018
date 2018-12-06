@@ -208,17 +208,34 @@ MeshList::~MeshList()
 */
 bool MeshList::Allocate()
 {
+  std::vector<std::string> modelFiles;
+  modelFiles.push_back("Res/Tree.obj");
+  modelFiles.push_back("Res/House.obj");
+  modelFiles.push_back("Res/Rock.obj");
+  modelFiles.push_back("Res/Ground.obj");
+  modelFiles.push_back("Res/Human.obj");
+  return Allocate(modelFiles);
+}
+
+/**
+* モデルデータからMeshのリストを作成する.
+*
+* @param modelFiles 読み込むモデルファイル名のリスト.
+*
+* @retval true  作成成功.
+* @retval false 作成失敗.
+*/
+bool MeshList::Allocate(const std::vector<std::string>& modelFiles)
+{
   Free();
 
   meshes.reserve(100);
   tmpVertices.reserve(10'000);
   tmpIndices.reserve(10'000);
 
-  AddFromObjFile("Res/Tree.obj");
-  AddFromObjFile("Res/House.obj");
-  AddFromObjFile("Res/Rock.obj");
-  AddFromObjFile("Res/Ground.obj");
-  AddFromObjFile("Res/Human.obj");
+  for (size_t i = 0; i < modelFiles.size(); ++i) {
+    AddFromObjFile(modelFiles[i].c_str());
+  }
 
   GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
   GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
