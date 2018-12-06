@@ -20,7 +20,7 @@ public:
   bool Initialize();
   void ProcessInput();
   void Update();
-  void Render() const;
+  void Render();
   void Finalize();
 
 private:
@@ -34,7 +34,10 @@ private:
 
   Shader::Program progSimple;
   Shader::Program progLighting;
-  Shader::LightList lightList;
+  Shader::LightList lights;
+
+  glm::vec3 viewPos;
+  float pointLightAngle;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED
