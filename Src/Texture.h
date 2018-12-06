@@ -16,6 +16,7 @@ GLuint LoadImage2D(const char* path);
 class Image2D
 {
 public:
+  Image2D() = default;
   explicit Image2D(GLuint texId);
   ~Image2D();
   void Reset(GLuint texId);

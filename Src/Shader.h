@@ -65,6 +65,7 @@ struct LightList
 class Program
 {
 public:
+  Program() = default;
   explicit Program(GLuint programId);
   ~Program();
 
