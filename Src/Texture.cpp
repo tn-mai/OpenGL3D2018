@@ -66,11 +66,15 @@ GLuint LoadImage2D(const char* path)
 {
   // TGAヘッダを読み込む.
   std::basic_ifstream<uint8_t> ifs;
+
   ifs.open(path, std::ios_base::binary);
   if (!ifs) {
     std::cerr << "WARNING: " << path << "を開けません.\n";
     return 0;
   }
+  std::vector<uint8_t> tmp(1024 * 1024);
+  ifs.rdbuf()->pubsetbuf(tmp.data(), tmp.size());
+
   std::cout << "INFO: " << path << "を読み込み中…";
   uint8_t tgaHeader[18];
   ifs.read(tgaHeader, 18);
