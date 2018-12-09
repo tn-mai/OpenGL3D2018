@@ -7,21 +7,22 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "MeshList.h"
+#include "Scene.h"
 
 /**
 * メインゲームシーン.
 */
-class MainGameScene
+class MainGameScene : public Scene
 {
 public:
   MainGameScene() = default;
-  ~MainGameScene() = default;
+  virtual ~MainGameScene() = default;
 
-  bool Initialize();
-  void ProcessInput();
-  void Update();
-  void Render();
-  void Finalize();
+  virtual bool Initialize() override;
+  virtual void ProcessInput() override;
+  virtual void Update() override;
+  virtual void Render() override;
+  virtual void Finalize() override;
 
 private:
   MeshList meshList;

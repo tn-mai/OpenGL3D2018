@@ -150,6 +150,7 @@
     <ClInclude Include="Src\GLFWEW.h" />
     <ClInclude Include="Src\MainGameScene.h" />
     <ClInclude Include="Src\MeshList.h" />
+    <ClInclude Include="Src\Scene.h" />
     <ClInclude Include="Src\Shader.h" />
     <ClInclude Include="Src\Texture.h" />
   </ItemGroup>
