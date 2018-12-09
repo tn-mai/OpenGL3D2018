@@ -3,6 +3,8 @@
 */
 #include "GLFWEW.h"
 #include "MainGameScene.h"
+#include "TitleScene.h"
+#include <memory>
 
 /// エントリーポイント.
 int main()
@@ -12,21 +14,37 @@ int main()
     return 1;
   }
 
-  MainGameScene mainGameScene;
-  if (!mainGameScene.Initialize()) {
+  std::shared_ptr<Scene> pScene (new TitleScene);
+  if (!pScene->Initialize()) {
     return 1;
   }
 
   // メインループ.
   window.InitTimer();
   while (!window.ShouldClose()) {
-    window.UpdateTimer();
-    mainGameScene.ProcessInput();
-    mainGameScene.Update();
-    mainGameScene.Render();
+    window.Update();
+
+    // シーンを切り替える.
+    if (!pScene->NextScene().empty()) {
+      glFinish();
+      pScene->Finalize();
+      if (pScene->NextScene() == "Title") {
+        pScene.reset(new TitleScene);
+      } else if (pScene->NextScene() == "MainGame") {
+        pScene.reset(new MainGameScene);
+      }
+      if (!pScene->Initialize()) {
+        return 1;
+      }
+      window.InitTimer();
+    }
+
+    pScene->ProcessInput();
+    pScene->Update();
+    pScene->Render();
     window.SwapBuffers();
   }
-  mainGameScene.Finalize();
+  pScene->Finalize();
 
   return 0;
 }
