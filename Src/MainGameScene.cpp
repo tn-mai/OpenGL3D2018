@@ -9,7 +9,14 @@
 */
 bool MainGameScene::Initialize()
 {
-  if (!meshList.Allocate()) {
+  std::vector<std::string> modelFiles;
+  modelFiles.push_back("Res/Tree.obj");
+  modelFiles.push_back("Res/House.obj");
+  modelFiles.push_back("Res/Rock.obj");
+  modelFiles.push_back("Res/Ground.obj");
+  modelFiles.push_back("Res/Human.obj");
+  modelFiles.push_back("Res/Plane.obj");
+  if (!meshList.Allocate(modelFiles)) {
     return false;
   }
   progSimple.Reset(Shader::BuildFromFile("Res/Simple.vert", "Res/Simple.frag"));
@@ -51,6 +58,9 @@ bool MainGameScene::Initialize()
   texRock.Reset(Texture::LoadImage2D("Res/Rock.tga"));
   texHuman.Reset(Texture::LoadImage2D("Res/Human.tga"));
 
+  texStageClear.Reset(Texture::LoadImage2D("Res/StageClear.tga"));
+  texGameOver.Reset(Texture::LoadImage2D("Res/GameOver.tga"));
+
   // ライトの設定.
   lights.ambient.color = glm::vec3(0.05f, 0.1f, 0.1f);
   lights.directional.direction = glm::normalize(glm::vec3(5, -2, -2));
@@ -77,24 +87,39 @@ void MainGameScene::ProcessInput()
   GLFWEW::Window& window = GLFWEW::Window::Instance();
   const float deltaTime = (float)window.DeltaTime();
 
-  // 0番のポイント・ライトを移動する.
-  const float speed = 10.0f * deltaTime;
-  if (window.IsKeyPressed(GLFW_KEY_A)) {
-    lights.point.position[0].x -= speed;
-  } else if (window.IsKeyPressed(GLFW_KEY_D)) {
-    lights.point.position[0].x += speed;
-  }
-  if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-    if (window.IsKeyPressed(GLFW_KEY_W)) {
-      lights.point.position[0].y += speed;
-    } else if (window.IsKeyPressed(GLFW_KEY_S)) {
-      lights.point.position[0].y -= speed;
+  if (state == State::play) {
+    // 0番のポイント・ライトを移動する.
+    const float speed = 10.0f * deltaTime;
+    if (window.IsKeyPressed(GLFW_KEY_A)) {
+      lights.point.position[0].x -= speed;
+    } else if (window.IsKeyPressed(GLFW_KEY_D)) {
+      lights.point.position[0].x += speed;
+    }
+    if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+      if (window.IsKeyPressed(GLFW_KEY_W)) {
+        lights.point.position[0].y += speed;
+      } else if (window.IsKeyPressed(GLFW_KEY_S)) {
+        lights.point.position[0].y -= speed;
+      }
+    } else {
+      if (window.IsKeyPressed(GLFW_KEY_W)) {
+        lights.point.position[0].z -= speed;
+      } else if (window.IsKeyPressed(GLFW_KEY_S)) {
+        lights.point.position[0].z += speed;
+      }
+    }
+
+    // ゲームクリア(仮).
+    if (window.IsKeyDown(GLFW_KEY_ENTER)) {
+      if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT) || window.IsKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+        state = State::gameOver;
+      } else {
+        state = State::stageClear;
+      }
     }
   } else {
-    if (window.IsKeyPressed(GLFW_KEY_W)) {
-      lights.point.position[0].z -= speed;
-    } else if (window.IsKeyPressed(GLFW_KEY_S)) {
-      lights.point.position[0].z += speed;
+    if (window.IsKeyDown(GLFW_KEY_ENTER)) {
+      NextScene("Title");
     }
   }
 }
@@ -105,16 +130,6 @@ void MainGameScene::ProcessInput()
 void MainGameScene::Update()
 {
   const float deltaTime = (float)GLFWEW::Window::Instance().DeltaTime();
-
-  // 座標変換行列を作成する.
-  const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
-  const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-  progLighting.SetViewProjectionMatrix(matProj * matView);
-  progSimple.SetViewProjectionMatrix(matProj * matView);
-
-  // 光源を設定する.
-  progLighting.Use();
-  progLighting.SetLightList(lights);
 
   // 光源モデルのY軸回転角を更新.
   pointLightAngle += glm::radians(90.0f) * deltaTime;
@@ -136,9 +151,18 @@ void MainGameScene::Render()
   glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // 座標変換行列を作成する.
+  const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
+  const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+  progLighting.SetViewProjectionMatrix(matProj * matView);
+  progSimple.SetViewProjectionMatrix(matProj * matView);
+
   progLighting.Use();
 
   meshList.BindVertexArray();
+
+  // 光源を設定する.
+  progLighting.SetLightList(lights);
 
   progLighting.BindTexture(0, texTree.Get());
 
@@ -169,7 +193,20 @@ void MainGameScene::Render()
   progSimple.Use();
   progSimple.BindTexture(0, texId.Get());
   for (int i = 0; i < 8; ++i) {
-    progSimple.Draw(meshList[0], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
+    progSimple.Draw(meshList[5], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
+  }
+
+  {
+    const glm::mat4x4 matProj = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f, 1.0f, 500.0f);
+    const glm::mat4x4 matView = glm::lookAt(glm::vec3(0, 0, 100), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    progSimple.SetViewProjectionMatrix(matProj * matView);
+    if (state == State::stageClear) {
+      progSimple.BindTexture(0, texStageClear.Get());
+      progSimple.Draw(meshList[5], glm::vec3(0), glm::vec3(0), glm::vec3(350, 60, 1));
+    } else if (state == State::gameOver) {
+      progSimple.BindTexture(0, texGameOver.Get());
+      progSimple.Draw(meshList[5], glm::vec3(0), glm::vec3(0), glm::vec3(300, 60, 1));
+    }
   }
 }
 

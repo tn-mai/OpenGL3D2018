@@ -10,7 +10,7 @@
 #include "Scene.h"
 
 /**
-* メインゲームシーン.
+* メインゲーム画面.
 */
 class MainGameScene : public Scene
 {
@@ -32,6 +32,8 @@ private:
   Texture::Image2D texHouse;
   Texture::Image2D texRock;
   Texture::Image2D texHuman;
+  Texture::Image2D texStageClear;
+  Texture::Image2D texGameOver;
 
   Shader::Program progSimple;
   Shader::Program progLighting;
@@ -39,6 +41,13 @@ private:
 
   glm::vec3 viewPos;
   float pointLightAngle;
+
+  enum class State {
+    play,
+    stageClear,
+    gameOver,
+  };
+  State state = State::play;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED
