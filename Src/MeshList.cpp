@@ -178,8 +178,6 @@ GLuint CreateVAO(GLuint vbo, GLuint ibo)
   glEnableVertexAttribArray(3);
   glVertexAttribPointer(3, sizeof(Vertex::normal) / sizeof(float), GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
   glBindVertexArray(0);
-  glDeleteBuffers(1, &ibo);
-  glDeleteBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   return vao;
@@ -237,8 +235,8 @@ bool MeshList::Allocate(const std::vector<std::string>& modelFiles)
     AddFromObjFile(modelFiles[i].c_str());
   }
 
-  GLuint ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
-  GLuint vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
+  ibo = CreateIBO(tmpIndices.size() * sizeof(GLushort), tmpIndices.data());
+  vbo = CreateVBO(tmpVertices.size() * sizeof(Vertex), tmpVertices.data());
   vao = CreateVAO(vbo, ibo);
 
   std::vector<Vertex>().swap(tmpVertices);
@@ -258,7 +256,11 @@ bool MeshList::Allocate(const std::vector<std::string>& modelFiles)
 void MeshList::Free()
 {
   glDeleteVertexArrays(1, &vao);
+  glDeleteBuffers(1, &ibo);
+  glDeleteBuffers(1, &vbo);
   vao = 0;
+  vbo = 0;
+  ibo = 0;
   std::vector<Mesh>().swap(meshes);
 }
 

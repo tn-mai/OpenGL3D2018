@@ -30,6 +30,8 @@ public:
 
 private:
   GLuint vao = 0;
+  GLuint vbo = 0;
+  GLuint ibo = 0;
   std::vector<Mesh> meshes;
 
   std::vector<Vertex> tmpVertices;
