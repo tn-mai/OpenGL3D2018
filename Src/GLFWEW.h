@@ -19,11 +19,13 @@ namespace GLFWEW {
 		bool Init(int w, int h, const char* title);
 		bool ShouldClose() const;
 		void SwapBuffers() const;
+		void Update();
 
-        void InitTimer();
-        void UpdateTimer();
-        double DeltaTime() const;
+		void InitTimer();
+		void UpdateTimer();
+		double DeltaTime() const;
 
+        bool IsKeyDown(int key) const;
         bool IsKeyPressed(int key) const;
         glm::vec2 GetMousePosition() const;
         int GetMouseButton(int button) const;
@@ -39,6 +41,14 @@ namespace GLFWEW {
 		GLFWwindow* window = nullptr;
         double previousTime = 0;
         double deltaTime = 0;
+
+        enum class KeyState : char {
+          release,
+          press1st,
+          press,
+        };
+
+        KeyState keyState[GLFW_KEY_LAST + 1];
 	};
 
 } // namespace GLFWEW
