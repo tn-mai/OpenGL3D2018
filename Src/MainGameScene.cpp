@@ -193,7 +193,7 @@ void MainGameScene::Render()
   progSimple.Use();
   progSimple.BindTexture(0, texId.Get());
   for (int i = 0; i < 8; ++i) {
-    progSimple.Draw(meshList[5], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
+    progSimple.Draw(meshList[4], lights.point.position[i], glm::vec3(0, pointLightAngle, 0), glm::vec3(1.0f, -0.25f, 1.0f));
   }
 
   {
