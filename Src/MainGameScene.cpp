@@ -76,6 +76,9 @@ bool MainGameScene::Initialize()
 
   pointLightAngle = 0;
 
+  playerVelocity = glm::vec3(0);
+  playerPos = glm::vec3(8, 0, 8);
+  playerRot = glm::vec3(0);
   return true;
 }
 
@@ -85,28 +88,30 @@ bool MainGameScene::Initialize()
 void MainGameScene::ProcessInput()
 {
   GLFWEW::Window& window = GLFWEW::Window::Instance();
-  const float deltaTime = (float)window.DeltaTime();
 
   if (state == State::play) {
-    // 0番のポイント・ライトを移動する.
-    const float speed = 10.0f * deltaTime;
+    // プレイヤーを移動する.
+    const float speed = 10.0f;
+    playerVelocity = glm::vec3(0);
     if (window.IsKeyPressed(GLFW_KEY_A)) {
-      lights.point.position[0].x -= speed;
+      playerVelocity.x = -1;
     } else if (window.IsKeyPressed(GLFW_KEY_D)) {
-      lights.point.position[0].x += speed;
+      playerVelocity.x += 1;
     }
-    if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-      if (window.IsKeyPressed(GLFW_KEY_W)) {
-        lights.point.position[0].y += speed;
-      } else if (window.IsKeyPressed(GLFW_KEY_S)) {
-        lights.point.position[0].y -= speed;
+    if (window.IsKeyPressed(GLFW_KEY_W)) {
+      playerVelocity.z = -1;
+    } else if (window.IsKeyPressed(GLFW_KEY_S)) {
+      playerVelocity.z = 1;
+    }
+    if (playerVelocity.x || playerVelocity.z) {
+      playerVelocity = glm::normalize(playerVelocity);
+
+      playerRot.y = glm::acos(playerVelocity.x) - 3.14f / 2;
+      if (playerVelocity.z >= 0) {
+        playerRot.y = 3.14f - playerRot.y;
       }
-    } else {
-      if (window.IsKeyPressed(GLFW_KEY_W)) {
-        lights.point.position[0].z -= speed;
-      } else if (window.IsKeyPressed(GLFW_KEY_S)) {
-        lights.point.position[0].z += speed;
-      }
+
+      playerVelocity *= speed;
     }
 
     // ゲームクリア(仮).
@@ -131,6 +136,10 @@ void MainGameScene::Update()
 {
   const float deltaTime = (float)GLFWEW::Window::Instance().DeltaTime();
 
+  const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
+  playerPos += playerVelocity * deltaTime;
+  viewPos = playerPos + viewOffset;
+
   // 光源モデルのY軸回転角を更新.
   pointLightAngle += glm::radians(90.0f) * deltaTime;
   if (pointLightAngle > glm::radians(360.0f)) {
@@ -153,7 +162,7 @@ void MainGameScene::Render()
 
   // 座標変換行列を作成する.
   const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
-  const glm::mat4x4 matView = glm::lookAt(viewPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+  const glm::mat4x4 matView = glm::lookAt(viewPos, playerPos, glm::vec3(0, 1, 0));
   progLighting.SetViewProjectionMatrix(matProj * matView);
   progSimple.SetViewProjectionMatrix(matProj * matView);
 
@@ -187,7 +196,7 @@ void MainGameScene::Render()
   progLighting.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
   progLighting.BindTexture(0, texHuman.Get());
-  progLighting.Draw(meshList[4], glm::vec3(8, 0, 8), glm::vec3(0, 3.14f, 0), glm::vec3(1));
+  progLighting.Draw(meshList[4], playerPos, playerRot, glm::vec3(1));
 
   // ポイント・ライトの位置が分かるように適当なモデルを表示.
   progSimple.Use();

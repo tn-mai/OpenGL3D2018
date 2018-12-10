@@ -39,6 +39,10 @@ private:
   Shader::Program progLighting;
   Shader::LightList lights;
 
+  glm::vec3 playerVelocity;
+  glm::vec3 playerPos;
+  glm::vec3 playerRot;
+
   glm::vec3 viewPos;
   float pointLightAngle;
 
