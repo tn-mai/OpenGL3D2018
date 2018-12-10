@@ -18,7 +18,7 @@ bool TitleScene::Initialize()
   progSimple.Reset(Shader::BuildFromFile("Res/Simple.vert", "Res/Simple.frag"));
 
   texLogo.Reset(Texture::LoadImage2D("Res/TitleLogo.tga"));
-  texBackGround.Reset(Texture::LoadImage2D("Res/TItleBack16.tga"));
+  texBackGround.Reset(Texture::LoadImage2D("Res/TItleBack.tga"));
 
   return true;
 }
