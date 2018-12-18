@@ -125,6 +125,26 @@ GLuint BuildFromFile(const char* vsPath, const char* fsPath)
   return Build(vsCode.data(), fsCode.data());
 }
 
+/**
+* ライトリストを初期化する.
+*
+* 全ての光源の明るさを0にする.
+*/
+void LightList::Init()
+{
+  ambient.color = glm::vec3(0);
+  directional.color = glm::vec3(0);
+  for (int i = 0; i < 8; ++i) {
+    point.color[i] = glm::vec3(0);
+  }
+  for (int i = 0; i < 4; ++i) {
+    spot.color[i] = glm::vec3(0);
+  }
+}
+
+/**
+* コンストラクタ.
+*/
 Program::Program()
 {
   lights.Init();
@@ -334,23 +354,6 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
 
   // メッシュを描画する.
   glDrawElementsBaseVertex(mesh.mode, mesh.count, GL_UNSIGNED_SHORT, mesh.indices, mesh.baseVertex);
-}
-
-/**
-* ライトリストを初期化する.
-*
-* 全ての光源の明るさを0にする.
-*/
-void LightList::Init()
-{
-  ambient.color = glm::vec3(0);
-  directional.color = glm::vec3(0);
-  for (int i = 0; i < 8; ++i) {
-    point.color[i] = glm::vec3(0);
-  }
-  for (int i = 0; i < 4; ++i) {
-    spot.color[i] = glm::vec3(0);
-  }
 }
 
 } // namespace Shader
