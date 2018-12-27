@@ -66,6 +66,9 @@
     <None Include="Res\Plane.obj">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="Res\Bullet.obj">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GLFWEW.h">
@@ -90,6 +93,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\TitleScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Actor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

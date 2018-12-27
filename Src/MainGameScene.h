@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "MeshList.h"
 #include "Scene.h"
+#include "Actor.h"
+#include <vector>
 
 /**
 * ÉÅÉCÉìÉQÅ[ÉÄâÊñ .
@@ -34,14 +36,11 @@ private:
   Texture::Image2D texHuman;
   Texture::Image2D texStageClear;
   Texture::Image2D texGameOver;
+  Texture::Image2D texBullet;
 
   Shader::Program progSimple;
   Shader::Program progLighting;
   Shader::LightList lights;
-
-  glm::vec3 playerVelocity;
-  glm::vec3 playerPos;
-  glm::vec3 playerRot;
 
   glm::vec3 viewPos;
   float pointLightAngle;
@@ -52,6 +51,12 @@ private:
     gameOver,
   };
   State state = State::play;
+
+  using ActorList = std::vector<Actor>;
+
+  Actor player;
+  float playerShotTimer = 0;
+  ActorList playerShotList;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED

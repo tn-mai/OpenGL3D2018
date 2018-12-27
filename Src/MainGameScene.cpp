@@ -3,6 +3,7 @@
 */
 #include "MainGameScene.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <algorithm>
 
 /**
 * 初期化.
@@ -16,6 +17,7 @@ bool MainGameScene::Initialize()
   modelFiles.push_back("Res/Ground.obj");
   modelFiles.push_back("Res/Human.obj");
   modelFiles.push_back("Res/Plane.obj");
+  modelFiles.push_back("Res/Bullet.obj");
   if (!meshList.Allocate(modelFiles)) {
     return false;
   }
@@ -57,6 +59,7 @@ bool MainGameScene::Initialize()
   texHouse.Reset(Texture::LoadImage2D("Res/House.tga"));
   texRock.Reset(Texture::LoadImage2D("Res/Rock.tga"));
   texHuman.Reset(Texture::LoadImage2D("Res/Human.tga"));
+  texBullet.Reset(Texture::LoadImage2D("Res/Bullet.tga"));
 
   texStageClear.Reset(Texture::LoadImage2D("Res/StageClear.tga"));
   texGameOver.Reset(Texture::LoadImage2D("Res/GameOver.tga"));
@@ -76,9 +79,7 @@ bool MainGameScene::Initialize()
 
   pointLightAngle = 0;
 
-  playerVelocity = glm::vec3(0);
-  playerPos = glm::vec3(8, 0, 8);
-  playerRot = glm::vec3(0);
+  player.Initialize(4, texHuman.Get(), glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
   return true;
 }
 
@@ -92,26 +93,40 @@ void MainGameScene::ProcessInput()
   if (state == State::play) {
     // プレイヤーを移動する.
     const float speed = 10.0f;
-    playerVelocity = glm::vec3(0);
+    player.velocity = glm::vec3(0);
     if (window.IsKeyPressed(GLFW_KEY_A)) {
-      playerVelocity.x = -1;
+      player.velocity.x = -1;
     } else if (window.IsKeyPressed(GLFW_KEY_D)) {
-      playerVelocity.x += 1;
+      player.velocity.x += 1;
     }
     if (window.IsKeyPressed(GLFW_KEY_W)) {
-      playerVelocity.z = -1;
+      player.velocity.z = -1;
     } else if (window.IsKeyPressed(GLFW_KEY_S)) {
-      playerVelocity.z = 1;
+      player.velocity.z = 1;
     }
-    if (playerVelocity.x || playerVelocity.z) {
-      playerVelocity = glm::normalize(playerVelocity);
+    if (player.velocity.x || player.velocity.z) {
+      player.velocity = glm::normalize(player.velocity);
 
-      playerRot.y = glm::acos(playerVelocity.x) - 3.14f / 2;
-      if (playerVelocity.z >= 0) {
-        playerRot.y = 3.14f - playerRot.y;
+      // ショットボタンが押されていなければ方向転換.
+      if (!window.IsKeyPressed(GLFW_KEY_SPACE)) {
+        player.rotation.y = glm::acos(player.velocity.x) - 3.14f / 2;
+        if (player.velocity.z >= 0) {
+          player.rotation.y = 3.14f - player.rotation.y;
+        }
       }
+      player.velocity *= speed;
+    }
 
-      playerVelocity *= speed;
+    if (window.IsKeyPressed(GLFW_KEY_SPACE)) {
+      if (playerShotTimer <= 0) {
+        playerShotTimer = 1.0f / 8.0f;
+        const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
+        Actor shot;
+        shot.Initialize(6, texBullet.Get(), player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
+        shot.velocity = matRotY * glm::vec4(0, 0, -40, 1);
+        shot.health = 1;
+        playerShotList.push_back(shot);
+      }
     }
 
     // ゲームクリア(仮).
@@ -136,9 +151,34 @@ void MainGameScene::Update()
 {
   const float deltaTime = (float)GLFWEW::Window::Instance().DeltaTime();
 
+  // ゾンビの動き:
+  // - 3-8体がまとまって出現する.
+  // - 適当に時間を開けて出現させる.
+  // - ステージごとに決められた数のゾンビを倒すとクリア.
+  // - 出現後はプレイヤーを追いかける.
+  // - プレイヤーに近づくと、自分の正面に定期的に攻撃判定を発生させる.
+  // - 攻撃判定はプレイヤーに当たると消える.
+  // - 攻撃が当たるとプレイヤーはダメージを負う.
+  // - プレイヤーの体力が0以下になったらゲームオーバー.
+
   const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
-  playerPos += playerVelocity * deltaTime;
-  viewPos = playerPos + viewOffset;
+  player.position += player.velocity * deltaTime;
+  viewPos = player.position + viewOffset;
+  if (playerShotTimer > 0) {
+    playerShotTimer -= deltaTime;
+  }
+
+  for (auto& e : playerShotList) {
+    if (e.health > 0) {
+      e.position += e.velocity * deltaTime;
+      if (glm::any(glm::lessThan(e.position, glm::vec3(-20)))) {
+        e.health = 0;
+      } else if (glm::any(glm::greaterThanEqual(e.position, glm::vec3(20)))) {
+        e.health = 0;
+      }
+    }
+  }
+  playerShotList.erase(std::remove_if(playerShotList.begin(), playerShotList.end(), [](const Actor& e) { return e.health <= 0; }), playerShotList.end());
 
   // 光源モデルのY軸回転角を更新.
   pointLightAngle += glm::radians(90.0f) * deltaTime;
@@ -162,7 +202,7 @@ void MainGameScene::Render()
 
   // 座標変換行列を作成する.
   const glm::mat4x4 matProj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 500.0f);
-  const glm::mat4x4 matView = glm::lookAt(viewPos, playerPos, glm::vec3(0, 1, 0));
+  const glm::mat4x4 matView = glm::lookAt(viewPos, player.position, glm::vec3(0, 1, 0));
   progLighting.SetViewProjectionMatrix(matProj * matView);
   progSimple.SetViewProjectionMatrix(matProj * matView);
 
@@ -195,8 +235,15 @@ void MainGameScene::Render()
   progLighting.BindTexture(0, texRock.Get());
   progLighting.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
 
-  progLighting.BindTexture(0, texHuman.Get());
-  progLighting.Draw(meshList[4], playerPos, playerRot, glm::vec3(1));
+  progLighting.BindTexture(0, player.texture);
+  progLighting.Draw(meshList[player.mesh], player.position, player.rotation, player.scale);
+
+  for (const auto& e : playerShotList) {
+    if (e.health > 0) {
+      progLighting.BindTexture(0, e.texture);
+      progLighting.Draw(meshList[e.mesh], e.position, e.rotation, e.scale);
+    }
+  }
 
   // ポイント・ライトの位置が分かるように適当なモデルを表示.
   progSimple.Use();

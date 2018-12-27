@@ -147,6 +147,7 @@
     <None Include="Res\VertexLighting.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Actor.h" />
     <ClInclude Include="Src\Geometry.h" />
     <ClInclude Include="Src\GLFWEW.h" />
     <ClInclude Include="Src\MainGameScene.h" />
@@ -182,6 +183,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\Plane.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\Bullet.obj">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
