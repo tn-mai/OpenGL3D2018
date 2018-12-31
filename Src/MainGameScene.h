@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "Actor.h"
 #include <vector>
+#include <random>
 
 /**
 * ƒƒCƒ“ƒQ[ƒ€‰æ–Ê.
@@ -57,6 +58,12 @@ private:
   Actor player;
   float playerShotTimer = 0;
   ActorList playerShotList;
+
+  std::mt19937 random;
+
+  float enemyPoppingTimer = 0;
+  int enemyLeft = 100;
+  ActorList enemyList;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED

@@ -10,6 +10,8 @@
 */
 bool MainGameScene::Initialize()
 {
+  random.seed(std::random_device()());
+
   std::vector<std::string> modelFiles;
   modelFiles.push_back("Res/Tree.obj");
   modelFiles.push_back("Res/House.obj");
@@ -160,6 +162,61 @@ void MainGameScene::Update()
   // - 攻撃が当たるとプレイヤーはダメージを負う.
   // - プレイヤーの体力が0以下になったらゲームオーバー.
 
+  // ゾンビの移動.
+  for (auto& zombie : enemyList) {
+    const float moveSpeed = 2.0f;
+    const float rotationSpeed = glm::radians(60.0f);
+    const float frontRange = glm::radians(15.0f);
+
+    const glm::vec3 v = player.position - zombie.position;
+    const glm::vec3 vTarget = glm::normalize(v);
+    float radian = std::atan2(-vTarget.z, vTarget.x) - glm::radians(90.0f);
+    if (radian <= 0) {
+      radian += glm::radians(360.0f);
+    }
+    const glm::vec3 vZombieFront = glm::rotate(glm::mat4(1), zombie.rotation.y, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1);
+    if (std::abs(radian - zombie.rotation.y) > frontRange) {
+      const glm::vec3 vRotDir = glm::cross(vZombieFront, vTarget);
+      if (vRotDir.y >= 0) {
+        zombie.rotation.y += rotationSpeed * deltaTime;
+        if (zombie.rotation.y >= glm::radians(360.0f)) {
+          zombie.rotation.y -= glm::radians(360.0f);
+        }
+      } else {
+        zombie.rotation.y -= rotationSpeed * deltaTime;
+        if (zombie.rotation.y < 0) {
+          zombie.rotation.y += glm::radians(360.0f);
+        }
+      }
+    }
+    if (glm::length(v) > 1.0f) {
+      zombie.position += vZombieFront * moveSpeed * deltaTime;
+    }
+  }
+
+  // ゾンビの発生.
+  if (enemyLeft > 0) {
+    if (enemyPoppingTimer >= 0) {
+      enemyPoppingTimer -= deltaTime;
+    } else {
+      enemyPoppingTimer += 20;
+
+      const int maxPopCount = 10;
+      const int popCount = std::min(enemyLeft, maxPopCount);
+      enemyLeft -= popCount;
+
+      std::uniform_int_distribution<int> rangeBase(-15, 15);
+      std::uniform_int_distribution<int> range(-5, 5);
+      glm::vec3 posBase(rangeBase(random), 0, rangeBase(random));
+      for (int i = 0; i < popCount; ++i) {
+        glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
+        Actor zombie;
+        zombie.Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
+        enemyList.push_back(zombie);
+      }
+    }
+  }
+
   const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
   player.position += player.velocity * deltaTime;
   viewPos = player.position + viewOffset;
@@ -236,6 +293,13 @@ void MainGameScene::Render()
 
   progLighting.BindTexture(0, player.texture);
   progLighting.Draw(meshList[player.mesh], player.position, player.rotation, player.scale);
+
+  for (const auto& e : enemyList) {
+    if (e.health > 0) {
+      progLighting.BindTexture(0, e.texture);
+      progLighting.Draw(meshList[e.mesh], e.position, e.rotation, e.scale);
+    }
+  }
 
   for (const auto& e : playerShotList) {
     if (e.health > 0) {
