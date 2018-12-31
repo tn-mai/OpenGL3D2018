@@ -24,13 +24,15 @@ public:
   Actor() = default;
   ~Actor() = default;
 
-  void Initialize(int mesh, GLuint tex, const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
+  void Initialize(int mesh, GLuint tex, int hp, const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale)
   {
     this->mesh = mesh;
     texture = tex;
     position = pos;
     rotation = rot;
     this->scale = scale;
+
+    health = hp;
   }
   void Finalize() {}
 

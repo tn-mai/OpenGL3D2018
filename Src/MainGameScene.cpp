@@ -79,7 +79,7 @@ bool MainGameScene::Initialize()
 
   pointLightAngle = 0;
 
-  player.Initialize(4, texHuman.Get(), glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
+  player.Initialize(4, texHuman.Get(), 10, glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
   return true;
 }
 
@@ -122,9 +122,8 @@ void MainGameScene::ProcessInput()
         playerShotTimer = 1.0f / 8.0f;
         const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
         Actor shot;
-        shot.Initialize(6, texBullet.Get(), player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
+        shot.Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
         shot.velocity = matRotY * glm::vec4(0, 0, -40, 1);
-        shot.health = 1;
         playerShotList.push_back(shot);
       }
     }
