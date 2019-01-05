@@ -82,6 +82,10 @@ bool MainGameScene::Initialize()
   pointLightAngle = 0;
 
   player.Initialize(4, texHuman.Get(), 10, glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
+  playerShotList.resize(100);
+  enemyList.resize(100);
+
+
   return true;
 }
 
@@ -125,6 +129,7 @@ void MainGameScene::ProcessInput()
         const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
         Actor shot;
         shot.Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
+        shot.colLocal = { glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(1, 1, 1) };
         shot.velocity = matRotY * glm::vec4(0, 0, -40, 1);
         playerShotList.push_back(shot);
       }
@@ -162,7 +167,7 @@ void MainGameScene::Update()
   // - 攻撃が当たるとプレイヤーはダメージを負う.
   // - プレイヤーの体力が0以下になったらゲームオーバー.
 
-  // ゾンビの移動.
+  // ゾンビの更新.
   for (auto& zombie : enemyList) {
     const float moveSpeed = 2.0f;
     const float rotationSpeed = glm::radians(60.0f);
@@ -190,7 +195,9 @@ void MainGameScene::Update()
       }
     }
     if (glm::length(v) > 1.0f) {
-      zombie.position += vZombieFront * moveSpeed * deltaTime;
+      zombie.velocity = vZombieFront * moveSpeed;
+    } else {
+      zombie.velocity = glm::vec3(0);
     }
   }
 
@@ -212,18 +219,56 @@ void MainGameScene::Update()
         glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
         Actor zombie;
         zombie.Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
+        zombie.colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
         enemyList.push_back(zombie);
       }
     }
   }
 
+  // カメラの更新.
   const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
   player.position += player.velocity * deltaTime;
   viewPos = player.position + viewOffset;
+
+  // 自機ショットタイマーの更新.
   if (playerShotTimer > 0) {
     playerShotTimer -= deltaTime;
   }
 
+  for (auto& bullet : playerShotList) {
+    bullet.Update();
+  }
+  for (auto& zombie : enemyList) {
+    zombie.Update();
+  }
+
+  // 衝突判定.
+  for (auto& bullet : playerShotList) {
+    if (bullet.health <= 0) {
+      continue;
+    }
+    for (auto& zombie : enemyList) {
+      if (zombie.health <= 0) {
+        continue;
+      }
+      const CollidePoint p = FindCollidePoint(bullet, zombie, deltaTime);
+      if (p.hasCollide) {
+        if (zombie.health < bullet.health) {
+          bullet.health -= zombie.health;
+          zombie.health = 0;
+        } else {
+          zombie.health -= bullet.health;
+          bullet.health = 0;
+          break;
+        }
+        glm::vec3 pos = p.point;
+      }
+    }
+  }
+  playerShotList.erase(std::remove_if(playerShotList.begin(), playerShotList.end(), [](const Actor& bullet) { return bullet.health <= 0; }), playerShotList.end());
+  enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(), [](const Actor& zombie) { return zombie.health <= 0; }), enemyList.end());
+
+  // 自機ショットの更新.
   for (auto& e : playerShotList) {
     if (e.health > 0) {
       e.position += e.velocity * deltaTime;
@@ -235,6 +280,12 @@ void MainGameScene::Update()
     }
   }
   playerShotList.erase(std::remove_if(playerShotList.begin(), playerShotList.end(), [](const Actor& e) { return e.health <= 0; }), playerShotList.end());
+
+  for (auto& zombie : enemyList) {
+    if (zombie.health >= 0) {
+      zombie.position += zombie.velocity * deltaTime;
+    }
+  }
 
   // 光源モデルのY軸回転角を更新.
   pointLightAngle += glm::radians(90.0f) * deltaTime;

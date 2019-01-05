@@ -9,7 +9,6 @@
 #include "MeshList.h"
 #include "Scene.h"
 #include "Actor.h"
-#include <vector>
 #include <random>
 
 /**
@@ -52,8 +51,6 @@ private:
     gameOver,
   };
   State state = State::play;
-
-  using ActorList = std::vector<Actor>;
 
   Actor player;
   float playerShotTimer = 0;
