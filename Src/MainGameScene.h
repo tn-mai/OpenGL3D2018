@@ -52,15 +52,16 @@ private:
   };
   State state = State::play;
 
-  Actor player;
-  float playerShotTimer = 0;
-  ActorList playerShotList;
-
   std::mt19937 random;
 
+  Actor player;
+  Actor playerBulletList[128];
+  Actor enemyList[128];
+  Actor effectList[128];
+
+  float playerBulletTimer = 0;
   float enemyPoppingTimer = 0;
   int enemyLeft = 100;
-  ActorList enemyList;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED

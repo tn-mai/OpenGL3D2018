@@ -82,9 +82,6 @@ bool MainGameScene::Initialize()
   pointLightAngle = 0;
 
   player.Initialize(4, texHuman.Get(), 10, glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
-  playerShotList.resize(100);
-  enemyList.resize(100);
-
 
   return true;
 }
@@ -124,14 +121,15 @@ void MainGameScene::ProcessInput()
     }
 
     if (window.IsKeyPressed(GLFW_KEY_SPACE)) {
-      if (playerShotTimer <= 0) {
-        playerShotTimer = 1.0f / 8.0f;
+      if (playerBulletTimer <= 0) {
+        playerBulletTimer = 1.0f / 8.0f;
         const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
-        Actor shot;
-        shot.Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
-        shot.colLocal = { glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(1, 1, 1) };
-        shot.velocity = matRotY * glm::vec4(0, 0, -40, 1);
-        playerShotList.push_back(shot);
+        Actor* bullet = FindAvailableActor(std::begin(playerBulletList), std::end(playerBulletList));
+        if (bullet) {
+          bullet->Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
+          bullet->colLocal = { glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(1, 1, 1) };
+          bullet->velocity = matRotY * glm::vec4(0, 0, -40, 1);
+        }
       }
     }
 
@@ -217,10 +215,11 @@ void MainGameScene::Update()
       glm::vec3 posBase(rangeBase(random), 0, rangeBase(random));
       for (int i = 0; i < popCount; ++i) {
         glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
-        Actor zombie;
-        zombie.Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
-        zombie.colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
-        enemyList.push_back(zombie);
+        Actor* zombie = FindAvailableActor(std::begin(enemyList), std::end(enemyList));
+        if (zombie) {
+          zombie->Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
+          zombie->colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
+        }
       }
     }
   }
@@ -231,11 +230,11 @@ void MainGameScene::Update()
   viewPos = player.position + viewOffset;
 
   // 自機ショットタイマーの更新.
-  if (playerShotTimer > 0) {
-    playerShotTimer -= deltaTime;
+  if (playerBulletTimer > 0) {
+    playerBulletTimer -= deltaTime;
   }
 
-  for (auto& bullet : playerShotList) {
+  for (auto& bullet : playerBulletList) {
     bullet.Update();
   }
   for (auto& zombie : enemyList) {
@@ -243,7 +242,7 @@ void MainGameScene::Update()
   }
 
   // 衝突判定.
-  for (auto& bullet : playerShotList) {
+  for (auto& bullet : playerBulletList) {
     if (bullet.health <= 0) {
       continue;
     }
@@ -253,23 +252,15 @@ void MainGameScene::Update()
       }
       const CollidePoint p = FindCollidePoint(bullet, zombie, deltaTime);
       if (p.hasCollide) {
-        if (zombie.health < bullet.health) {
-          bullet.health -= zombie.health;
-          zombie.health = 0;
-        } else {
-          zombie.health -= bullet.health;
-          bullet.health = 0;
-          break;
-        }
-        glm::vec3 pos = p.point;
+        zombie.health -= bullet.health;
+        bullet.health = 0;
+        break;
       }
     }
   }
-  playerShotList.erase(std::remove_if(playerShotList.begin(), playerShotList.end(), [](const Actor& bullet) { return bullet.health <= 0; }), playerShotList.end());
-  enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(), [](const Actor& zombie) { return zombie.health <= 0; }), enemyList.end());
 
   // 自機ショットの更新.
-  for (auto& e : playerShotList) {
+  for (auto& e : playerBulletList) {
     if (e.health > 0) {
       e.position += e.velocity * deltaTime;
       if (glm::any(glm::lessThan(e.position, glm::vec3(-20)))) {
@@ -279,7 +270,6 @@ void MainGameScene::Update()
       }
     }
   }
-  playerShotList.erase(std::remove_if(playerShotList.begin(), playerShotList.end(), [](const Actor& e) { return e.health <= 0; }), playerShotList.end());
 
   for (auto& zombie : enemyList) {
     if (zombie.health >= 0) {
@@ -352,7 +342,7 @@ void MainGameScene::Render()
     }
   }
 
-  for (const auto& e : playerShotList) {
+  for (const auto& e : playerBulletList) {
     if (e.health > 0) {
       progLighting.BindTexture(0, e.texture);
       progLighting.Draw(meshList[e.mesh], e.position, e.rotation, e.scale);

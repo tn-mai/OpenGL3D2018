@@ -5,7 +5,6 @@
 #define ACTOR_H_INCLUDED
 #include <GL/glew.h>
 #include <glm/vec3.hpp>
-#include <vector>
 
 /**
 * ’¼•û‘Ì.
@@ -44,8 +43,7 @@ public:
   Rect colWorld;
 };
 
-using ActorList = std::vector<Actor>;
-using ActorPtrList = std::vector<Actor*>;
+Actor* FindAvailableActor(Actor* first, Actor* last);
 
 bool DetectCollision(const Actor&, const Actor&);
 

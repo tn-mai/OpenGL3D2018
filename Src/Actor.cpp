@@ -48,7 +48,7 @@ void Actor::Update()
 */
 Actor* FindAvailableActor(Actor* first, Actor* last)
 {
-  for (Actor* i = first; i != last; ++first) {
+  for (Actor* i = first; i != last; ++i) {
     if (i->health <= 0) {
       return i;
     }
