@@ -55,9 +55,9 @@ private:
   std::mt19937 random;
 
   Actor player;
-  Actor playerBulletList[128];
-  Actor enemyList[128];
-  Actor effectList[128];
+  std::vector<Actor*> playerBulletList;
+  std::vector<Actor*> enemyList;
+  std::vector<Actor*> objectList;
 
   float playerBulletTimer = 0;
   float enemyPoppingTimer = 0;

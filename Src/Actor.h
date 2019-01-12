@@ -4,7 +4,11 @@
 #ifndef ACTOR_H_INCLUDED
 #define ACTOR_H_INCLUDED
 #include <GL/glew.h>
+#include "Shader.h"
+#include "MeshList.h"
 #include <glm/vec3.hpp>
+#include <vector>
+#include <memory>
 
 /**
 * 直方体.
@@ -22,12 +26,12 @@ class Actor
 {
 public:
   Actor() = default;
-  ~Actor() = default;
+  virtual ~Actor() = default;
 
   void Initialize(int mesh, GLuint tex, int hp, const glm::vec3& pos, const glm::vec3& rot, const glm::vec3& scale);
   void Finalize();
 
-  void Update();
+  virtual void Update(float deltTIme);
 
 public:
   int mesh = 0;
@@ -38,21 +42,62 @@ public:
   glm::vec3 scale = glm::vec3(1);
 
   glm::vec3 velocity = glm::vec3(0);
+  glm::vec3 tmpVelocity = glm::vec3(0);
   int health = 0;
   Rect colLocal;
   Rect colWorld;
 };
 
-Actor* FindAvailableActor(Actor* first, Actor* last);
+Actor* FindAvailableActor(std::vector<Actor*>&);
+void UpdateActorList(std::vector<Actor*>&, float);
+void RenderActorList(std::vector<Actor*>&, Shader::Program&, MeshList&);
+void ClearActorList(std::vector<Actor*>&);
 
-bool DetectCollision(const Actor&, const Actor&);
-
-struct CollidePoint
+/**
+*
+*/
+class BulletActor : public Actor
 {
-  bool hasCollide;
-  glm::vec3 point;
+public:
+  virtual ~BulletActor() = default;
+  virtual void Update(float deltaTime) override;
 };
 
-CollidePoint FindCollidePoint(const Actor&, const Actor&, float);
+/**
+*
+*/
+class ZombieActor : public Actor
+{
+public:
+  virtual ~ZombieActor() = default;
+  virtual void Update(float deltaTime) override;
+
+  void Target(Actor* actor) { target = actor; }
+  Actor* Target() const { return target; }
+
+private:
+  Actor* target = nullptr;
+};
+bool DetectCollision(const Actor&, const Actor&);
+
+// 衝突した面(0=左, 1=右, 2=下, 3=上, 4=奥, 5=手前).
+enum class CollisionPlane
+{
+  none = -1, // 衝突なし.
+  negativeX = 0, // 左側.
+  positiveX, // 右側.
+  negativeY, // 下側.
+  positiveY, // 上側.
+  negativeZ, // 奥側.
+  positiveZ, // 手前側.
+};
+
+struct CollisionTime
+{
+  float time; // 衝突した時間.
+  CollisionPlane plane; // 衝突した面.
+};
+
+CollisionTime FindCollisionTime(const Actor&, const Actor&, float);
 
 #endif // ACTOR_H_INCLUDED

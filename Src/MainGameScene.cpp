@@ -82,6 +82,47 @@ bool MainGameScene::Initialize()
   pointLightAngle = 0;
 
   player.Initialize(4, texHuman.Get(), 10, glm::vec3(8, 0, 8), glm::vec3(0), glm::vec3(1));
+  player.colLocal = { {-0.5f, 0, -0.5f }, {1, 1.7f, 1} };
+  playerBulletList.resize(128);
+  for (auto& e : playerBulletList) {
+    e = new BulletActor;
+  }
+
+  enemyList.resize(128);
+  for (auto& e : enemyList) {
+    e = new ZombieActor;
+  }
+
+  objectList.resize(128);
+  for (auto& e : objectList) {
+    e = new Actor;
+  }
+
+  const int treeCount = 10; // 木を植える本数.
+  const float radius = 8; //　半径.
+  for (float i = 0; i < treeCount; ++i) {
+    const float theta = 3.14f * 2 / treeCount * i;
+    const float x = std::cos(theta) * radius;
+    const float z = std::sin(theta) * radius;
+    objectList[(size_t)i]->Initialize(0, texTree.Get(), 1, glm::vec3(x, 0, z), glm::vec3(0, theta * 5, 0), glm::vec3(1));
+    objectList[(size_t)i]->colLocal = { {-0.5f, 0, -0.5f }, { 1, 4, 1 } };
+    objectList[(size_t)i]->Update(0);
+  }
+  objectList[treeCount + 0]->Initialize(1, texHouse.Get(), 1, glm::vec3(0, 0, 0), glm::vec3(0), glm::vec3(1));
+  objectList[treeCount + 0]->colLocal = { {-3, 0, -3 }, { 6, 4, 6 } };
+  objectList[treeCount + 0]->Update(0);
+  objectList[treeCount + 1]->Initialize(1, texHouse.Get(), 1, glm::vec3(0, 0, -15), glm::vec3(0), glm::vec3(1));
+  objectList[treeCount + 1]->colLocal = { {-3, 0, -3 }, { 6, 4, 6 } };
+  objectList[treeCount + 1]->Update(0);
+  objectList[treeCount + 2]->Initialize(1, texHouse.Get(), 1, glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
+  objectList[treeCount + 2]->colLocal = { {-3, 0, -3 }, { 6, 4, 6 } };
+  objectList[treeCount + 2]->Update(0);
+
+  objectList[treeCount + 3]->Initialize(2, texRock.Get(), 1, glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
+  objectList[treeCount + 3]->colLocal = { {-0.5f, 0, -0.5f }, { 1, 1, 1 } };
+  objectList[treeCount + 3]->Update(0);
+
+  objectList[treeCount + 4]->Initialize(3, texId.Get(), 1, glm::vec3(0, 0, 0), glm::vec3(0), glm::vec3(1));
 
   return true;
 }
@@ -124,7 +165,7 @@ void MainGameScene::ProcessInput()
       if (playerBulletTimer <= 0) {
         playerBulletTimer = 1.0f / 8.0f;
         const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
-        Actor* bullet = FindAvailableActor(std::begin(playerBulletList), std::end(playerBulletList));
+        Actor* bullet = FindAvailableActor(playerBulletList);
         if (bullet) {
           bullet->Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
           bullet->colLocal = { glm::vec3(-0.25f, -0.25f, -0.25f), glm::vec3(1, 1, 1) };
@@ -155,49 +196,26 @@ void MainGameScene::Update()
 {
   const float deltaTime = (float)GLFWEW::Window::Instance().DeltaTime();
 
-  // ゾンビの動き:
-  // - 3-8体がまとまって出現する.
-  // - 適当に時間を開けて出現させる.
+  // ゲームの目的:
+  // - 無限に湧いてくるゾンビを倒し続ける.
+  // - 規定数を倒すとステージクリア.
   // - ステージごとに決められた数のゾンビを倒すとクリア.
-  // - 出現後はプレイヤーを追いかける.
-  // - プレイヤーに近づくと、自分の正面に定期的に攻撃判定を発生させる.
-  // - 攻撃判定はプレイヤーに当たると消える.
-  // - 攻撃が当たるとプレイヤーはダメージを負う.
+  // - ステージが進むと出現するゾンビの総数、同時発生数が増え、移動速度が上がる.
   // - プレイヤーの体力が0以下になったらゲームオーバー.
 
-  // ゾンビの更新.
-  for (auto& zombie : enemyList) {
-    const float moveSpeed = 2.0f;
-    const float rotationSpeed = glm::radians(60.0f);
-    const float frontRange = glm::radians(15.0f);
+  // ゾンビの動き:
+  // - マップを10m四方に区切り、その中のランダムに選ばれた区域に出現.
+  // - (ステージ数*2+0～3)体がまとまって出現する.
+  // - 出現間隔は(30-ステージ数*2)秒. ただし10秒未満にはならない.
+  // - 出現後はプレイヤーを追いかける.
+  // - プレイヤーに近づくと、自分の正面に定期的に攻撃判定を発生させる.
+  // - 攻撃判定は1フレームだけ.
+  // - 攻撃が当たるとプレイヤーはダメージを負う.
 
-    const glm::vec3 v = player.position - zombie.position;
-    const glm::vec3 vTarget = glm::normalize(v);
-    float radian = std::atan2(-vTarget.z, vTarget.x) - glm::radians(90.0f);
-    if (radian <= 0) {
-      radian += glm::radians(360.0f);
-    }
-    const glm::vec3 vZombieFront = glm::rotate(glm::mat4(1), zombie.rotation.y, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1);
-    if (std::abs(radian - zombie.rotation.y) > frontRange) {
-      const glm::vec3 vRotDir = glm::cross(vZombieFront, vTarget);
-      if (vRotDir.y >= 0) {
-        zombie.rotation.y += rotationSpeed * deltaTime;
-        if (zombie.rotation.y >= glm::radians(360.0f)) {
-          zombie.rotation.y -= glm::radians(360.0f);
-        }
-      } else {
-        zombie.rotation.y -= rotationSpeed * deltaTime;
-        if (zombie.rotation.y < 0) {
-          zombie.rotation.y += glm::radians(360.0f);
-        }
-      }
-    }
-    if (glm::length(v) > 1.0f) {
-      zombie.velocity = vZombieFront * moveSpeed;
-    } else {
-      zombie.velocity = glm::vec3(0);
-    }
-  }
+  // ゾンビの更新.
+  UpdateActorList(enemyList, deltaTime);
+  // 自機ショットの更新.
+  UpdateActorList(playerBulletList, deltaTime);
 
   // ゾンビの発生.
   if (enemyLeft > 0) {
@@ -215,10 +233,33 @@ void MainGameScene::Update()
       glm::vec3 posBase(rangeBase(random), 0, rangeBase(random));
       for (int i = 0; i < popCount; ++i) {
         glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
-        Actor* zombie = FindAvailableActor(std::begin(enemyList), std::end(enemyList));
+        ZombieActor* zombie = (ZombieActor*)FindAvailableActor(enemyList);
         if (zombie) {
           zombie->Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
           zombie->colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
+          zombie->Target(&player);
+        }
+      }
+    }
+  }
+
+  player.Update(deltaTime);
+  for (auto& object : objectList) {
+    if (object->health > 0) {
+      if (DetectCollision(player, *object)) {
+        const CollisionTime t = FindCollisionTime(*object, player, deltaTime);
+        if (t.plane != CollisionPlane::none) {
+          const float time = deltaTime * t.time -0.00001f;
+          player.position += player.velocity * time;
+          if (t.plane == CollisionPlane::negativeX || t.plane == CollisionPlane::positiveX) {
+            player.velocity.x = 0;
+          } else if (t.plane == CollisionPlane::negativeY || t.plane == CollisionPlane::positiveY) {
+            player.velocity.y = 0;
+          } else if (t.plane == CollisionPlane::negativeZ || t.plane == CollisionPlane::positiveZ) {
+            player.velocity.z = 0;
+          }
+          player.velocity *= -t.time;
+          player.position += player.velocity * -time;
         }
       }
     }
@@ -226,7 +267,6 @@ void MainGameScene::Update()
 
   // カメラの更新.
   const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
-  player.position += player.velocity * deltaTime;
   viewPos = player.position + viewOffset;
 
   // 自機ショットタイマーの更新.
@@ -234,47 +274,25 @@ void MainGameScene::Update()
     playerBulletTimer -= deltaTime;
   }
 
-  for (auto& bullet : playerBulletList) {
-    bullet.Update();
-  }
-  for (auto& zombie : enemyList) {
-    zombie.Update();
-  }
-
   // 衝突判定.
   for (auto& bullet : playerBulletList) {
-    if (bullet.health <= 0) {
+    if (bullet->health <= 0) {
       continue;
     }
     for (auto& zombie : enemyList) {
-      if (zombie.health <= 0) {
+      if (zombie->health <= 0) {
         continue;
       }
-      const CollidePoint p = FindCollidePoint(bullet, zombie, deltaTime);
-      if (p.hasCollide) {
-        zombie.health -= bullet.health;
-        bullet.health = 0;
-        break;
+      if (DetectCollision(*bullet, *zombie)) {
+        const CollisionTime t = FindCollisionTime(*bullet, *zombie, deltaTime);
+        if (t.time) {
+          zombie->health -= bullet->health;
+          bullet->health = 0;
+          break;
+        }
       }
     }
-  }
-
-  // 自機ショットの更新.
-  for (auto& e : playerBulletList) {
-    if (e.health > 0) {
-      e.position += e.velocity * deltaTime;
-      if (glm::any(glm::lessThan(e.position, glm::vec3(-20)))) {
-        e.health = 0;
-      } else if (glm::any(glm::greaterThanEqual(e.position, glm::vec3(20)))) {
-        e.health = 0;
-      }
-    }
-  }
-
-  for (auto& zombie : enemyList) {
-    if (zombie.health >= 0) {
-      zombie.position += zombie.velocity * deltaTime;
-    }
+    bullet->position += bullet->velocity * deltaTime;
   }
 
   // 光源モデルのY軸回転角を更新.
@@ -310,44 +328,12 @@ void MainGameScene::Render()
   // 光源を設定する.
   progLighting.SetLightList(lights);
 
-  progLighting.BindTexture(0, texTree.Get());
-
-  const float treeCount = 10; // 木を植える本数.
-  const float radius = 8; //　半径.
-  for (float i = 0; i < treeCount; ++i) {
-    const float theta = 3.14f * 2 / treeCount * i;
-    const float x = std::cos(theta) * radius;
-    const float z = std::sin(theta) * radius;
-    progLighting.Draw(meshList[0], glm::vec3(x, 0, z), glm::vec3(0, theta * 5, 0), glm::vec3(1));
-  }
-
-  progLighting.BindTexture(0, texId.Get());
-  progLighting.Draw(meshList[3], glm::vec3(0), glm::vec3(0), glm::vec3(1));
-
-  progLighting.BindTexture(0, texHouse.Get());
-  progLighting.Draw(meshList[1], glm::vec3(0), glm::vec3(0), glm::vec3(1));
-  progLighting.Draw(meshList[1], glm::vec3(0, 0, 15), glm::vec3(0), glm::vec3(1));
-  progLighting.Draw(meshList[1], glm::vec3(0, 0, -15), glm::vec3(0), glm::vec3(1));
-
-  progLighting.BindTexture(0, texRock.Get());
-  progLighting.Draw(meshList[2], glm::vec3(4, 0, 0), glm::vec3(0), glm::vec3(1));
-
   progLighting.BindTexture(0, player.texture);
   progLighting.Draw(meshList[player.mesh], player.position, player.rotation, player.scale);
 
-  for (const auto& e : enemyList) {
-    if (e.health > 0) {
-      progLighting.BindTexture(0, e.texture);
-      progLighting.Draw(meshList[e.mesh], e.position, e.rotation, e.scale);
-    }
-  }
-
-  for (const auto& e : playerBulletList) {
-    if (e.health > 0) {
-      progLighting.BindTexture(0, e.texture);
-      progLighting.Draw(meshList[e.mesh], e.position, e.rotation, e.scale);
-    }
-  }
+  RenderActorList(objectList, progLighting, meshList);
+  RenderActorList(enemyList, progLighting, meshList);
+  RenderActorList(playerBulletList, progLighting, meshList);
 
   // ポイント・ライトの位置が分かるように適当なモデルを表示.
   progSimple.Use();
@@ -375,4 +361,7 @@ void MainGameScene::Render()
 */
 void MainGameScene::Finalize()
 {
+  ClearActorList(playerBulletList);
+  ClearActorList(enemyList);
+  ClearActorList(objectList);
 }
