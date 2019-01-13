@@ -57,6 +57,8 @@ struct LightList
   DirectionalLight directional;
   PointLight point;
   SpotLight spot;
+
+  void Init();
 };
 
 /**
@@ -65,9 +67,12 @@ struct LightList
 class Program
 {
 public:
+  Program();
   explicit Program(GLuint programId);
   ~Program();
 
+  void Reset(GLuint programId);
+  bool IsNull() const;
   void Use();
   void BindVertexArray(GLuint);
   void BindTexture(GLuint, GLuint);
@@ -76,20 +81,20 @@ public:
   void Draw(const Mesh&, const glm::vec3& t, const glm::vec3& r, const glm::vec3& s);
 
 private:
-  GLuint id; // プログラムID.
+  GLuint id = 0; // プログラムID.
 
   // uniform変数の位置.
-  GLint locMatMVP;
-  GLint locPointLightPos;
-  GLint locPointLightCol;
-  GLint locDirLightDir;
-  GLint locDirLightCol;
-  GLint locAmbLightCol;
-  GLint locSpotLightPos;
-  GLint locSpotLightDir;
-  GLint locSpotLightCol;
+  GLint locMatMVP = -1;
+  GLint locPointLightPos = -1;
+  GLint locPointLightCol = -1;
+  GLint locDirLightDir = -1;
+  GLint locDirLightCol = -1;
+  GLint locAmbLightCol = -1;
+  GLint locSpotLightPos = -1;
+  GLint locSpotLightDir = -1;
+  GLint locSpotLightCol = -1;
 
-  glm::mat4 matVP;
+  glm::mat4 matVP = glm::mat4(1);
   LightList lights;
 };
 

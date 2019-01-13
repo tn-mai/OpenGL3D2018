@@ -129,12 +129,14 @@
   <ItemGroup>
     <ClCompile Include="Src\GLFWEW.cpp" />
     <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\MainGameScene.cpp" />
     <ClCompile Include="Src\MeshList.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\Texture.cpp">
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ShowIncludes>
     </ClCompile>
+    <ClCompile Include="Src\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -147,13 +149,21 @@
   <ItemGroup>
     <ClInclude Include="Src\Geometry.h" />
     <ClInclude Include="Src\GLFWEW.h" />
+    <ClInclude Include="Src\MainGameScene.h" />
     <ClInclude Include="Src\MeshList.h" />
+    <ClInclude Include="Src\Scene.h" />
     <ClInclude Include="Src\Shader.h" />
     <ClInclude Include="Src\Texture.h" />
+    <ClInclude Include="Src\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Res\GameOver.tga" />
     <Image Include="Res\House.tga" />
+    <Image Include="Res\human.tga" />
     <Image Include="Res\Rock.tga" />
+    <Image Include="Res\StageClear.tga" />
+    <Image Include="Res\TitleBack.tga" />
+    <Image Include="Res\TitleLogo.tga" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\Tree.obj">
@@ -162,6 +172,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\House.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\human.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\Plane.obj">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -66,7 +66,16 @@ GLuint LoadImage2D(const char* path)
 {
   // TGAヘッダを読み込む.
   std::basic_ifstream<uint8_t> ifs;
+
   ifs.open(path, std::ios_base::binary);
+  if (!ifs) {
+    std::cerr << "WARNING: " << path << "を開けません.\n";
+    return 0;
+  }
+  std::vector<uint8_t> tmp(1024 * 1024);
+  ifs.rdbuf()->pubsetbuf(tmp.data(), tmp.size());
+
+  std::cout << "INFO: " << path << "を読み込み中…";
   uint8_t tgaHeader[18];
   ifs.read(tgaHeader, 18);
 
@@ -91,6 +100,7 @@ GLuint LoadImage2D(const char* path)
 
   // 画像データが「上から下」で格納されている場合、上下を入れ替える.
   if (tgaHeader[17] & 0x20) {
+    std::cout << "反転中…";
     const int lineSize = width * pixelDepth / 8;
     std::vector<uint8_t> tmp(imageSize);
     std::vector<uint8_t>::iterator source = buf.begin();
@@ -102,6 +112,7 @@ GLuint LoadImage2D(const char* path)
     }
     buf.swap(tmp);
   }
+  std::cout << "完了\n";
 
   GLenum type = GL_UNSIGNED_BYTE;
   GLenum format = GL_BGRA;
@@ -116,6 +127,56 @@ GLuint LoadImage2D(const char* path)
 
   // 読み込んだ画像データからテクスチャを作成する.
   return CreateImage2D(width, height, buf.data(), format, type);
+}
+
+/**
+* コンストラクタ.
+*
+* @param texId テクスチャ・オブジェクトのID.
+*/
+Image2D::Image2D(GLuint texId)
+{
+  Reset(texId);
+}
+
+/**
+* デストラクタ.
+*/
+Image2D::~Image2D()
+{
+  glDeleteTextures(1, &id);
+}
+
+/**
+* テクスチャ・オブジェクトを設定する.
+*
+* @param texId テクスチャ・オブジェクトのID.
+*/
+void Image2D::Reset(GLuint texId)
+{
+  glDeleteTextures(1, &id);
+  id = texId;
+}
+
+/**
+* テクスチャ・オブジェクトが設定されているか調べる.
+*
+* @retval true  設定されている.
+* @retval false 設定されていない.
+*/
+bool Image2D::IsNull() const
+{
+  return id;
+}
+
+/**
+* テクスチャ・オブジェクトを取得する.
+*
+* @return テクスチャ・オブジェクトのID.
+*/
+GLuint Image2D::Get() const
+{
+  return id;
 }
 
 } // namespace Texture

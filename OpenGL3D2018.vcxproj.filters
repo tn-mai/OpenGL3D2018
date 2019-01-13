@@ -30,6 +30,12 @@
     <ClCompile Include="Src\MeshList.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MainGameScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TitleScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -54,6 +60,12 @@
     <None Include="Res\Tree.obj">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="Res\human.obj">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Res\Plane.obj">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GLFWEW.h">
@@ -71,12 +83,36 @@
     <ClInclude Include="Src\MeshList.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\MainGameScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\TitleScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\House.tga">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="Res\Rock.tga">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="Res\human.tga">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="Res\GameOver.tga">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="Res\StageClear.tga">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="Res\TitleBack.tga">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="Res\TitleLogo.tga">
       <Filter>リソース ファイル</Filter>
     </Image>
   </ItemGroup>

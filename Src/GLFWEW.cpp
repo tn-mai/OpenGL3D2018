@@ -130,7 +130,26 @@ void Window::SwapBuffers() const
 */
 bool Window::IsKeyPressed(int key) const
 {
-  return glfwGetKey(window, key) == GLFW_PRESS;
+  if (key < 0 || key >= GLFW_KEY_LAST + 1) {
+    return false;
+  }
+  return keyState[key] != KeyState::release;
+}
+
+/**
+* キーが押された瞬間か調べる.
+*
+* @param key 調べるキーのID(GLFW_KEY_Aなど).
+*
+* @retval true  キーが押された瞬間.
+* @retval false キーが押された瞬間ではない.
+*/
+bool Window::IsKeyDown(int key) const
+{
+  if (key < 0 || key >= GLFW_KEY_LAST + 1) {
+    return false;
+  }
+  return keyState[key] == KeyState::press1st;
 }
 
 /**
@@ -174,6 +193,26 @@ void Window::UpdateTimer()
 double Window::DeltaTime() const
 {
   return deltaTime;
+}
+
+/**
+* 状態を更新する.
+*/
+void Window::Update()
+{
+  UpdateTimer();
+  for (size_t i = 0; i < GLFW_KEY_LAST + 1; ++i) {
+    const bool pressed = glfwGetKey(window, i) == GLFW_PRESS;
+    if (pressed) {
+      if (keyState[i] == KeyState::release) {
+        keyState[i] = KeyState::press1st;
+      } else if (keyState[i] == KeyState::press1st) {
+        keyState[i] = KeyState::press;
+      }
+    } else if (keyState[i] != KeyState::release) {
+      keyState[i] = KeyState::release;
+    }
+  }
 }
 
 /**

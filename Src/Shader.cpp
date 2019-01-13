@@ -126,12 +126,73 @@ GLuint BuildFromFile(const char* vsPath, const char* fsPath)
 }
 
 /**
+* ライトリストを初期化する.
+*
+* 全ての光源の明るさを0にする.
+*/
+void LightList::Init()
+{
+  ambient.color = glm::vec3(0);
+  directional.color = glm::vec3(0);
+  for (int i = 0; i < 8; ++i) {
+    point.color[i] = glm::vec3(0);
+  }
+  for (int i = 0; i < 4; ++i) {
+    spot.color[i] = glm::vec3(0);
+  }
+}
+
+/**
+* コンストラクタ.
+*/
+Program::Program()
+{
+  lights.Init();
+}
+
+/**
 * コンストラクタ.
 *
 * @param id プログラム・オブジェクトのID.
 */
-Program::Program(GLuint id) : id(id)
+Program::Program(GLuint programId)
 {
+  lights.Init();
+  Reset(programId);
+}
+
+/**
+* デストラクタ.
+*
+* プログラム・オブジェクトを削除する.
+*/
+Program::~Program()
+{
+  glDeleteProgram(id);
+}
+
+/**
+* プログラム・オブジェクトを設定する.
+*
+* @param id プログラム・オブジェクトのID.
+*/
+void Program::Reset(GLuint programId)
+{
+  glDeleteProgram(id);
+  id = programId;
+  if (id == 0) {
+    locMatMVP = -1;
+    locPointLightPos = -1;
+    locPointLightCol = -1;
+    locDirLightDir = -1;
+    locDirLightCol = -1;
+    locAmbLightCol = -1;
+    locSpotLightPos = -1;
+    locSpotLightDir = -1;
+    locSpotLightCol = -1;
+    return;
+  }
+
   locMatMVP = glGetUniformLocation(id, "matMVP");
   locPointLightPos = glGetUniformLocation(id, "pointLight.position");
   locPointLightCol = glGetUniformLocation(id, "pointLight.color");
@@ -151,13 +212,14 @@ Program::Program(GLuint id) : id(id)
 }
 
 /**
-* デストラクタ.
+* プログラム・オブジェクトが設定されているか調べる.
 *
-* プログラム・オブジェクトを削除する.
+* @retval true  設定されている.
+* @retval false 設定されていない.
 */
-Program::~Program()
+bool Program::IsNull() const
 {
-  glDeleteProgram(id);
+  return id;
 }
 
 /**
@@ -240,6 +302,10 @@ void Program::SetViewProjectionMatrix(const glm::mat4& matVP)
 */
 void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, const glm::vec3& s)
 {
+  if (id == 0) {
+    return;
+  }
+
   // モデル行列を計算する.
   const glm::mat4 matScale = glm::scale(glm::mat4(1), s);
   const glm::mat4 matRotateX = glm::rotate(glm::mat4(1), r.x, glm::vec3(1, 0, 0));
