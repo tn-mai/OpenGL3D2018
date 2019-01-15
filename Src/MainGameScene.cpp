@@ -65,6 +65,15 @@ bool MainGameScene::Initialize()
 
   texStageClear.Reset(Texture::LoadImage2D("Res/StageClear.tga"));
   texGameOver.Reset(Texture::LoadImage2D("Res/GameOver.tga"));
+  texHP.Reset(Texture::LoadImage2D("Res/HP.tga"));
+  texDay.Reset(Texture::LoadImage2D("Res/Day.tga"));
+  texScore.Reset(Texture::LoadImage2D("Res/Score.tga"));
+  for (int i = 0; i < 10; ++i) {
+    std::string filename = "Res/Number_";
+    filename += '0' + i;
+    filename += ".tga";
+    texNumber[i].Reset(Texture::LoadImage2D(filename.c_str()));
+  }
 
   // ライトの設定.
   lights.ambient.color = glm::vec3(0.05f, 0.1f, 0.1f);
@@ -178,6 +187,7 @@ void MainGameScene::ProcessInput()
       }
     }
   } else if (state == State::stageClear) {
+    player.velocity.x = player.velocity.z = 0;
     if (window.IsKeyDown(GLFW_KEY_ENTER)) {
       ++stageNo;
       enemyTotal = 10 + stageNo * 10;
@@ -190,6 +200,7 @@ void MainGameScene::ProcessInput()
       state = State::play;
     }
   } else {
+    player.velocity.x = player.velocity.z = 0;
     if (window.IsKeyDown(GLFW_KEY_ENTER)) {
       NextScene("Title");
     }
@@ -284,7 +295,7 @@ void MainGameScene::Update()
     playerBulletTimer -= deltaTime;
   }
 
-  // プレイヤーの弾と衝突判定.
+  // プレイヤーの弾と敵の衝突判定.
   for (auto& bullet : playerBulletList) {
     if (bullet->health <= 0) {
       continue;
@@ -299,7 +310,10 @@ void MainGameScene::Update()
           zombie->health -= bullet->health;
           bullet->health = 0;
           if (zombie->health <= 0) {
+            score += 200;
             ++enemyKilled;
+          } else {
+            score += 10;
           }
           break;
         }
@@ -319,8 +333,11 @@ void MainGameScene::Update()
       continue;
     }
     ZombieActor* zombie = (ZombieActor*)actor;
+    if (zombie->target->health <= 0) {
+      continue;
+    }
     if (zombie->isAttacking) {
-      const glm::vec3 vFront(-std::cos(zombie->rotation.y), 0, -std::sin(zombie->rotation.y));
+      const glm::vec3 vFront(std::sin(zombie->rotation.y), 0, -std::cos(zombie->rotation.y));
       const glm::vec3 vTarget = zombie->target->position - zombie->position;
       const float angle = std::acos(glm::dot(vFront, vTarget));
       if (std::abs(angle) < glm::radians(45.0f) && glm::length(vTarget) < 1.5f) {
@@ -382,9 +399,57 @@ void MainGameScene::Render()
   }
 
   {
+    glDisable(GL_DEPTH_TEST);
+
     const glm::mat4x4 matProj = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f, 1.0f, 500.0f);
     const glm::mat4x4 matView = glm::lookAt(glm::vec3(0, 0, 100), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     progSimple.SetViewProjectionMatrix(matProj * matView);
+
+    // ステージ数表示.
+    progSimple.BindTexture(0, texDay.Get());
+    progSimple.Draw(meshList[5], glm::vec3(-336, -300 + 64 + 24 + 4, 0), glm::vec3(0), glm::vec3(256 / 4, 128 / 4, 1));
+    int tmpStageNo = stageNo;
+    if (tmpStageNo > 999) {
+      tmpStageNo = 999;
+    }
+    for (int i = 0; i < 3; ++i) {
+      const int number = tmpStageNo % 10;
+      progSimple.BindTexture(0, texNumber[number].Get());
+      progSimple.Draw(meshList[5], glm::vec3(-300 + 32 * (3 - i), -300 + 64 + 24 + 4, 0), glm::vec3(0), glm::vec3(32, 32, 1));
+      tmpStageNo /= 10;
+    }
+
+    // HP表示.
+    progSimple.BindTexture(0, texHP.Get());
+    progSimple.Draw(meshList[5], glm::vec3(-336, -300 + 24 + 4, 0), glm::vec3(0), glm::vec3(192 / 4, 128 / 4, 1));
+    int tmpHealth = player.health;
+    if (tmpHealth < 0) {
+      tmpHealth = 0;
+    } else if (tmpHealth > 99) {
+      tmpHealth = 99;
+    }
+    for (int i = 0; i < 2; ++i) {
+      const int number = tmpHealth % 10;
+      progSimple.BindTexture(0, texNumber[number].Get());
+      progSimple.Draw(meshList[5], glm::vec3(-300 + 32 * (2 - i), -300 + 24 + 4, 0), glm::vec3(0), glm::vec3(32, 32, 1));
+      tmpHealth /= 10;
+    }
+
+    // スコア表示.
+    progSimple.BindTexture(0, texScore.Get());
+    progSimple.Draw(meshList[5], glm::vec3(-120, 300 - 24 - 4, 0), glm::vec3(0), glm::vec3(384 / 4, 128 / 4, 1));
+    int tmpScore = score;
+    if (tmpScore > 99999999) {
+      tmpScore = 99999999;
+    }
+    for (int i = 0; i < 8; ++i) {
+      const int number = tmpScore % 10;
+      progSimple.BindTexture(0, texNumber[number].Get());
+      progSimple.Draw(meshList[5], glm::vec3(-32 + 32 * (8 - i), 300 - 24 - 4, 0), glm::vec3(0), glm::vec3(32, 32, 1));
+      tmpScore /= 10;
+    }
+
+    // ステージクリア・ゲームオーバー表示.
     if (state == State::stageClear) {
       progSimple.BindTexture(0, texStageClear.Get());
       progSimple.Draw(meshList[5], glm::vec3(0), glm::vec3(0), glm::vec3(350, 60, 1));

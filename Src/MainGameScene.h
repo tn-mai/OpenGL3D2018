@@ -37,6 +37,10 @@ private:
   Texture::Image2D texStageClear;
   Texture::Image2D texGameOver;
   Texture::Image2D texBullet;
+  Texture::Image2D texHP;
+  Texture::Image2D texDay;
+  Texture::Image2D texScore;
+  Texture::Image2D texNumber[10];
 
   Shader::Program progSimple;
   Shader::Program progLighting;
@@ -60,6 +64,7 @@ private:
   std::vector<Actor*> objectList;
 
   float playerBulletTimer = 0;
+  int score = 0;
 
   int stageNo = 1;
   float enemySpeed = 1.0f; // ƒ]ƒ“ƒr‚ÌˆÚ“®‘¬“x.
