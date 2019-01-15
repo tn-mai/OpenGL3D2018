@@ -56,6 +56,22 @@ void ClearActorList(std::vector<Actor*>&);
 /**
 *
 */
+class PlayerActor : public Actor
+{
+public:
+  virtual ~PlayerActor() = default;
+  virtual void Update(float deltaTime) override;
+
+public:
+  float direction = 0;
+
+private:
+  float downAngle = 0;
+};
+
+/**
+*
+*/
 class BulletActor : public Actor
 {
 public:
@@ -72,11 +88,11 @@ public:
   virtual ~ZombieActor() = default;
   virtual void Update(float deltaTime) override;
 
-  void Target(Actor* actor) { target = actor; }
-  Actor* Target() const { return target; }
-
-private:
+public:
   Actor* target = nullptr;
+  float attackingTimer = 5.0f;
+  bool isAttacking = false;
+  float baseSpeed = 1.0f;
 };
 bool DetectCollision(const Actor&, const Actor&);
 

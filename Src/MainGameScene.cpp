@@ -124,6 +124,10 @@ bool MainGameScene::Initialize()
 
   objectList[treeCount + 4]->Initialize(3, texId.Get(), 1, glm::vec3(0, 0, 0), glm::vec3(0), glm::vec3(1));
 
+  enemyTotal = 20;
+  enemyLeft = enemyTotal;
+  enemyKilled = 0;
+
   return true;
 }
 
@@ -153,9 +157,9 @@ void MainGameScene::ProcessInput()
 
       // ショットボタンが押されていなければ方向転換.
       if (!window.IsKeyPressed(GLFW_KEY_SPACE)) {
-        player.rotation.y = glm::acos(player.velocity.x) - 3.14f / 2;
+        player.direction = glm::acos(player.velocity.x) - 3.14f / 2;
         if (player.velocity.z >= 0) {
-          player.rotation.y = 3.14f - player.rotation.y;
+          player.direction = 3.14f - player.direction;
         }
       }
       player.velocity *= speed;
@@ -164,7 +168,7 @@ void MainGameScene::ProcessInput()
     if (window.IsKeyPressed(GLFW_KEY_SPACE)) {
       if (playerBulletTimer <= 0) {
         playerBulletTimer = 1.0f / 8.0f;
-        const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.rotation.y, glm::vec3(0, 1, 0));
+        const glm::mat4 matRotY = glm::rotate(glm::mat4(1), player.direction, glm::vec3(0, 1, 0));
         Actor* bullet = FindAvailableActor(playerBulletList);
         if (bullet) {
           bullet->Initialize(6, texBullet.Get(), 1, player.position + glm::vec3(matRotY * glm::vec4(0.25f, 1, -0.125f, 1)), player.rotation, glm::vec3(1));
@@ -173,14 +177,17 @@ void MainGameScene::ProcessInput()
         }
       }
     }
-
-    // ゲームクリア(仮).
+  } else if (state == State::stageClear) {
     if (window.IsKeyDown(GLFW_KEY_ENTER)) {
-      if (window.IsKeyPressed(GLFW_KEY_LEFT_SHIFT) || window.IsKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
-        state = State::gameOver;
-      } else {
-        state = State::stageClear;
-      }
+      ++stageNo;
+      enemyTotal = 10 + stageNo * 10;
+      enemyLeft = enemyTotal;
+      enemyKilled = 0;
+      enemySpeed = 1.0f + (float)(stageNo - 1) * 0.1f;
+      enemyPoppingInterval = 15.0f - (float)(stageNo - 1) * 1.0f;
+      enemyPoppingTimer = 0;
+      player.position = glm::vec3(8, 0, 8);
+      state = State::play;
     }
   } else {
     if (window.IsKeyDown(GLFW_KEY_ENTER)) {
@@ -212,44 +219,14 @@ void MainGameScene::Update()
   // - 攻撃判定は1フレームだけ.
   // - 攻撃が当たるとプレイヤーはダメージを負う.
 
-  // ゾンビの更新.
-  UpdateActorList(enemyList, deltaTime);
-  // 自機ショットの更新.
-  UpdateActorList(playerBulletList, deltaTime);
-
-  // ゾンビの発生.
-  if (enemyLeft > 0) {
-    if (enemyPoppingTimer >= 0) {
-      enemyPoppingTimer -= deltaTime;
-    } else {
-      enemyPoppingTimer += 20;
-
-      const int maxPopCount = 10;
-      const int popCount = std::min(enemyLeft, maxPopCount);
-      enemyLeft -= popCount;
-
-      std::uniform_int_distribution<int> rangeBase(-15, 15);
-      std::uniform_int_distribution<int> range(-5, 5);
-      glm::vec3 posBase(rangeBase(random), 0, rangeBase(random));
-      for (int i = 0; i < popCount; ++i) {
-        glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
-        ZombieActor* zombie = (ZombieActor*)FindAvailableActor(enemyList);
-        if (zombie) {
-          zombie->Initialize(4, texHuman.Get(), 10, pos, glm::vec3(0), glm::vec3(1));
-          zombie->colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
-          zombie->Target(&player);
-        }
-      }
-    }
-  }
-
+  // プレイヤーの更新.
   player.Update(deltaTime);
   for (auto& object : objectList) {
     if (object->health > 0) {
       if (DetectCollision(player, *object)) {
         const CollisionTime t = FindCollisionTime(*object, player, deltaTime);
         if (t.plane != CollisionPlane::none) {
-          const float time = deltaTime * t.time -0.00001f;
+          const float time = deltaTime * t.time - 0.00001f;
           player.position += player.velocity * time;
           if (t.plane == CollisionPlane::negativeX || t.plane == CollisionPlane::positiveX) {
             player.velocity.x = 0;
@@ -265,16 +242,49 @@ void MainGameScene::Update()
     }
   }
 
+  // 自機ショットの更新.
+  UpdateActorList(playerBulletList, deltaTime);
+
+  // ゾンビの更新.
+  UpdateActorList(enemyList, deltaTime);
+
+  // ゾンビの発生.
+  if (enemyLeft > 0) {
+    if (enemyPoppingTimer >= 0) {
+      enemyPoppingTimer -= deltaTime;
+    } else {
+      enemyPoppingTimer += enemyPoppingInterval;
+
+      const int maxPopCount = 10;
+      const int popCount = std::min(enemyLeft, maxPopCount);
+      enemyLeft -= popCount;
+
+      std::uniform_int_distribution<int> rangeBase(-15, 15);
+      std::uniform_int_distribution<int> range(-5, 5);
+      glm::vec3 posBase(rangeBase(random), 0, rangeBase(random));
+      for (int i = 0; i < popCount; ++i) {
+        glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
+        ZombieActor* zombie = (ZombieActor*)FindAvailableActor(enemyList);
+        if (zombie) {
+          zombie->Initialize(4, texHuman.Get(), 5, pos, glm::vec3(0), glm::vec3(1));
+          zombie->colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
+          zombie->target = &player;
+          zombie->baseSpeed = enemySpeed;
+        }
+      }
+    }
+  }
+
   // カメラの更新.
-  const glm::vec3 viewOffset = glm::vec3(10, 15, 10);
+  const glm::vec3 viewOffset = glm::vec3(0, 15, 10);
   viewPos = player.position + viewOffset;
 
-  // 自機ショットタイマーの更新.
+  // プレイヤーの弾の発射タイマーの更新.
   if (playerBulletTimer > 0) {
     playerBulletTimer -= deltaTime;
   }
 
-  // 衝突判定.
+  // プレイヤーの弾と衝突判定.
   for (auto& bullet : playerBulletList) {
     if (bullet->health <= 0) {
       continue;
@@ -288,11 +298,40 @@ void MainGameScene::Update()
         if (t.time) {
           zombie->health -= bullet->health;
           bullet->health = 0;
+          if (zombie->health <= 0) {
+            ++enemyKilled;
+          }
           break;
         }
       }
     }
     bullet->position += bullet->velocity * deltaTime;
+  }
+
+  // 敵をすべて倒したらステージクリア.
+  if (enemyKilled == enemyTotal) {
+    state = State::stageClear;
+  }
+
+  // ゾンビの攻撃.
+  for (auto& actor : enemyList) {
+    if (actor->health <= 0) {
+      continue;
+    }
+    ZombieActor* zombie = (ZombieActor*)actor;
+    if (zombie->isAttacking) {
+      const glm::vec3 vFront(-std::cos(zombie->rotation.y), 0, -std::sin(zombie->rotation.y));
+      const glm::vec3 vTarget = zombie->target->position - zombie->position;
+      const float angle = std::acos(glm::dot(vFront, vTarget));
+      if (std::abs(angle) < glm::radians(45.0f) && glm::length(vTarget) < 1.5f) {
+        --zombie->target->health;
+      }
+    }
+  }
+
+  // プレイヤーの体力が0以下になったらゲームオーバー.
+  if (player.health <= 0) {
+    state = State::gameOver;
   }
 
   // 光源モデルのY軸回転角を更新.

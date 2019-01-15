@@ -4,6 +4,7 @@
 #include "Actor.h"
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 /**
 * ‰Šú‰».
@@ -100,6 +101,22 @@ void ClearActorList(std::vector<Actor*>& actorList)
   }
   actorList.clear();
 }
+/**
+*
+*/
+void PlayerActor::Update(float deltaTime)
+{
+  Actor::Update(deltaTime);
+  if (health <= 0) {
+    downAngle += glm::radians(-45.0f) * deltaTime;
+    if (downAngle < glm::radians(-90.0f)) {
+      downAngle = glm::radians(-90.0f);
+    }
+  }
+  const glm::quat qx(glm::vec3(downAngle, 0, 0));
+  const glm::quat qy(glm::vec3(0, direction, 0));
+  rotation = glm::eulerAngles(qx * qy);
+}
 
 /**
 *
@@ -124,8 +141,8 @@ void ZombieActor::Update(float deltaTime)
     return;
   }
 
-  const float moveSpeed = 2.0f;
-  const float rotationSpeed = glm::radians(60.0f);
+  const float moveSpeed = baseSpeed * 2.0f;
+  const float rotationSpeed = baseSpeed * glm::radians(60.0f);
   const float frontRange = glm::radians(15.0f);
 
   const glm::vec3 v = target->position - position;
@@ -149,10 +166,22 @@ void ZombieActor::Update(float deltaTime)
       }
     }
   }
+
+  // \•ª‚ÉÚ‹ß‚µ‚Ä‚¢‚È‚¯‚ê‚ÎˆÚ“®‚·‚é. Ú‹ß‚µ‚Ä‚¢‚ê‚ÎUŒ‚‚·‚é.
   if (glm::length(v) > 1.0f) {
     velocity = vZombieFront * moveSpeed;
   } else {
     velocity = glm::vec3(0);
+    // ’èŠú“I‚ÉUŒ‚ó‘Ô‚É‚È‚é.
+    if (isAttacking) {
+      isAttacking = false;
+      attackingTimer = 5.0f;
+    } else {
+      attackingTimer -= deltaTime;
+      if (attackingTimer <= 0) {
+        isAttacking = true;
+      }
+    }
   }
 }
 

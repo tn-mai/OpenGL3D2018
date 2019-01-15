@@ -54,14 +54,21 @@ private:
 
   std::mt19937 random;
 
-  Actor player;
+  PlayerActor player;
   std::vector<Actor*> playerBulletList;
   std::vector<Actor*> enemyList;
   std::vector<Actor*> objectList;
 
   float playerBulletTimer = 0;
-  float enemyPoppingTimer = 0;
-  int enemyLeft = 100;
+
+  int stageNo = 1;
+  float enemySpeed = 1.0f; // ゾンビの移動速度.
+  float enemyPoppingInterval = 15.0f;
+  float enemyPoppingTimer = 0.0f;
+
+  int enemyTotal = 100; // 敵の総数.
+  int enemyLeft = 100; // 未登場の敵の数. 敵を出現させるたびに減少していく.
+  int enemyKilled = 0; // 殺した敵の数. この数値がenemyTotalと等しくなったらステージクリア.
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED
