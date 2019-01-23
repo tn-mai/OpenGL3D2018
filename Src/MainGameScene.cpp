@@ -337,7 +337,7 @@ void MainGameScene::Update()
       continue;
     }
     if (zombie->isAttacking) {
-      const glm::vec3 vFront(std::sin(zombie->rotation.y), 0, -std::cos(zombie->rotation.y));
+      const glm::vec3 vFront = glm::rotate(glm::mat4(1), zombie->rotation.y, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 0);
       const glm::vec3 vTarget = zombie->target->position - zombie->position;
       const float angle = std::acos(glm::dot(vFront, vTarget));
       if (std::abs(angle) < glm::radians(45.0f) && glm::length(vTarget) < 1.5f) {
