@@ -61,6 +61,7 @@ bool MainGameScene::Initialize()
   texHouse.Reset(Texture::LoadImage2D("Res/House.tga"));
   texRock.Reset(Texture::LoadImage2D("Res/Rock.tga"));
   texHuman.Reset(Texture::LoadImage2D("Res/Human.tga"));
+  texZombie.Reset(Texture::LoadImage2D("Res/Zombie.tga"));
   texBullet.Reset(Texture::LoadImage2D("Res/Bullet.tga"));
 
   texStageClear.Reset(Texture::LoadImage2D("Res/StageClear.tga"));
@@ -277,7 +278,7 @@ void MainGameScene::Update()
         glm::vec3 pos = posBase + glm::vec3(range(random), 0, range(random));
         ZombieActor* zombie = (ZombieActor*)FindAvailableActor(enemyList);
         if (zombie) {
-          zombie->Initialize(4, texHuman.Get(), 5, pos, glm::vec3(0), glm::vec3(1));
+          zombie->Initialize(4, texZombie.Get(), 5, pos, glm::vec3(0), glm::vec3(1));
           zombie->colLocal = { glm::vec3(-0.5f, 0, -0.5f), glm::vec3(1, 1.8f, 1) };
           zombie->target = &player;
           zombie->baseSpeed = enemySpeed;

@@ -166,6 +166,7 @@
     <Image Include="Res\StageClear.tga" />
     <Image Include="Res\TitleBack.tga" />
     <Image Include="Res\TitleLogo.tga" />
+    <Image Include="Res\Zombie.tga" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\Tree.obj">

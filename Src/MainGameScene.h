@@ -34,6 +34,7 @@ private:
   Texture::Image2D texHouse;
   Texture::Image2D texRock;
   Texture::Image2D texHuman;
+  Texture::Image2D texZombie;
   Texture::Image2D texStageClear;
   Texture::Image2D texGameOver;
   Texture::Image2D texBullet;
