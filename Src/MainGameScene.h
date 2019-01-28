@@ -12,6 +12,42 @@
 #include <random>
 
 /**
+* プレイヤーが操作するアクター.
+*/
+class PlayerActor : public Actor
+{
+public:
+  virtual ~PlayerActor() = default;
+  virtual void Update(float deltaTime) override;
+};
+
+/**
+* プレイヤーから発射される弾のアクター.
+*/
+class BulletActor : public Actor
+{
+public:
+  virtual ~BulletActor() = default;
+  virtual void Update(float deltaTime) override;
+};
+
+/**
+* 敵(ゾンビ)のアクター.
+*/
+class ZombieActor : public Actor
+{
+public:
+  virtual ~ZombieActor() = default;
+  virtual void Update(float deltaTime) override;
+
+public:
+  Actor* target = nullptr;
+  float attackingTimer = 5.0f;
+  bool isAttacking = false;
+  float baseSpeed = 1.0f;
+};
+
+/**
 * メインゲーム画面.
 */
 class MainGameScene : public Scene

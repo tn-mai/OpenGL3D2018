@@ -8,7 +8,6 @@
 #include "MeshList.h"
 #include <glm/vec3.hpp>
 #include <vector>
-#include <memory>
 
 /**
 * íºï˚ëÃ.
@@ -42,7 +41,6 @@ public:
   glm::vec3 scale = glm::vec3(1);
 
   glm::vec3 velocity = glm::vec3(0);
-  glm::vec3 tmpVelocity = glm::vec3(0);
   int health = 0;
   Rect colLocal;
   Rect colWorld;
@@ -53,47 +51,6 @@ void UpdateActorList(std::vector<Actor*>&, float);
 void RenderActorList(std::vector<Actor*>&, Shader::Program&, MeshList&);
 void ClearActorList(std::vector<Actor*>&);
 
-/**
-*
-*/
-class PlayerActor : public Actor
-{
-public:
-  virtual ~PlayerActor() = default;
-  virtual void Update(float deltaTime) override;
-
-public:
-  float direction = 0;
-
-private:
-  float downAngle = 0;
-};
-
-/**
-*
-*/
-class BulletActor : public Actor
-{
-public:
-  virtual ~BulletActor() = default;
-  virtual void Update(float deltaTime) override;
-};
-
-/**
-*
-*/
-class ZombieActor : public Actor
-{
-public:
-  virtual ~ZombieActor() = default;
-  virtual void Update(float deltaTime) override;
-
-public:
-  Actor* target = nullptr;
-  float attackingTimer = 5.0f;
-  bool isAttacking = false;
-  float baseSpeed = 1.0f;
-};
 bool DetectCollision(const Actor&, const Actor&);
 
 // è’ìÀÇµÇΩñ (0=ç∂, 1=âE, 2=â∫, 3=è„, 4=âú, 5=éËëO).

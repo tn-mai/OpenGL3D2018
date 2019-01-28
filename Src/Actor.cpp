@@ -4,7 +4,6 @@
 #include "Actor.h"
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 /**
 * ‰Šú‰».
@@ -97,92 +96,12 @@ void RenderActorList(std::vector<Actor*>& actorList, Shader::Program& shader, Me
 void ClearActorList(std::vector<Actor*>& actorList)
 {
   for (auto& actor : actorList) {
-    delete actor;
+    if (actor) {
+      actor->Finalize();
+      delete actor;
+    }
   }
   actorList.clear();
-}
-/**
-*
-*/
-void PlayerActor::Update(float deltaTime)
-{
-  Actor::Update(deltaTime);
-  if (health <= 0) {
-    downAngle += glm::radians(-45.0f) * deltaTime;
-    if (downAngle < glm::radians(-90.0f)) {
-      downAngle = glm::radians(-90.0f);
-    }
-  }
-  const glm::quat qx(glm::vec3(downAngle, 0, 0));
-  const glm::quat qy(glm::vec3(0, direction, 0));
-  rotation = glm::eulerAngles(qx * qy);
-}
-
-/**
-*
-*/
-void BulletActor::Update(float deltaTime)
-{
-  Actor::Update(deltaTime);
-  if (glm::any(glm::lessThan(position, glm::vec3(-20)))) {
-    health = 0;
-  } else if (glm::any(glm::greaterThanEqual(position, glm::vec3(20)))) {
-    health = 0;
-  }
-}
-
-/**
-*
-*/
-void ZombieActor::Update(float deltaTime)
-{
-  Actor::Update(deltaTime);
-  if (!target) {
-    return;
-  }
-
-  const float moveSpeed = baseSpeed * 2.0f;
-  const float rotationSpeed = baseSpeed * glm::radians(60.0f);
-  const float frontRange = glm::radians(15.0f);
-
-  const glm::vec3 v = target->position - position;
-  const glm::vec3 vTarget = glm::normalize(v);
-  float radian = std::atan2(-vTarget.z, vTarget.x) - glm::radians(90.0f);
-  if (radian <= 0) {
-    radian += glm::radians(360.0f);
-  }
-  const glm::vec3 vZombieFront = glm::rotate(glm::mat4(1), rotation.y, glm::vec3(0, 1, 0)) * glm::vec4(0, 0, -1, 1);
-  if (std::abs(radian - rotation.y) > frontRange) {
-    const glm::vec3 vRotDir = glm::cross(vZombieFront, vTarget);
-    if (vRotDir.y >= 0) {
-      rotation.y += rotationSpeed * deltaTime;
-      if (rotation.y >= glm::radians(360.0f)) {
-        rotation.y -= glm::radians(360.0f);
-      }
-    } else {
-      rotation.y -= rotationSpeed * deltaTime;
-      if (rotation.y < 0) {
-        rotation.y += glm::radians(360.0f);
-      }
-    }
-  }
-
-  // \•ª‚ÉÚ‹ß‚µ‚Ä‚¢‚È‚¯‚ê‚ÎˆÚ“®‚·‚é. Ú‹ß‚µ‚Ä‚¢‚ê‚ÎUŒ‚‚·‚é.
-  if (glm::length(v) > 1.0f) {
-    velocity = vZombieFront * moveSpeed;
-  } else {
-    velocity = glm::vec3(0);
-    // ’èŠú“I‚ÉUŒ‚ó‘Ô‚É‚È‚é.
-    if (isAttacking) {
-      isAttacking = false;
-      attackingTimer = 5.0f;
-    } else {
-      attackingTimer -= deltaTime;
-      if (attackingTimer <= 0) {
-        isAttacking = true;
-      }
-    }
-  }
 }
 
 /**
