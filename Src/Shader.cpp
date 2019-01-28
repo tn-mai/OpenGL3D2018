@@ -308,11 +308,12 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
 
   // モデル行列を計算する.
   const glm::mat4 matScale = glm::scale(glm::mat4(1), s);
-  const glm::mat4 matRotateX = glm::rotate(glm::mat4(1), r.x, glm::vec3(1, 0, 0));
-  const glm::mat4 matRotateXY = glm::rotate(matRotateX, r.y, glm::vec3(0, 1, 0));
-  const glm::mat4 matRotateXYZ = glm::rotate(matRotateXY, r.z, glm::vec3(0, 0, -1));
+  const glm::mat4 matRotateY = glm::rotate(glm::mat4(1), r.y, glm::vec3(0, 1, 0));
+  const glm::mat4 matRotateZY = glm::rotate(matRotateY, r.z, glm::vec3(0, 0, -1));
+  const glm::mat4 matRotateXZY = glm::rotate(matRotateZY, r.x, glm::vec3(1, 0, 0));
   const glm::mat4 matTranslate = glm::translate(glm::mat4(1), t);
-  const glm::mat4 matModel = matTranslate * matRotateXYZ * matScale;
+  const glm::mat4 matModelTR = matTranslate * matRotateXZY;
+  const glm::mat4 matModel = matModelTR * matScale;
 
   // モデル・ビュー・プロジェクション行列を計算し、GPUメモリに転送する.
   const glm::mat4 matMVP = matVP * matModel;
@@ -320,14 +321,14 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
 
   // モデル座標系における指向性ライトの方向を計算し、GPUメモリに転送する.
   if (locDirLightDir >= 0) {
-    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXYZ));
+    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXZY));
     const glm::vec3 dirLightDirOnModel = matInvRotate * lights.directional.direction;
     glUniform3fv(locDirLightDir, 1, &dirLightDirOnModel.x);
   }
 
   // モデル座標系におけるポイントライトの座標を計算し、GPUメモリに転送する.
   if (locPointLightPos >= 0) {
-    const glm::mat4 matInvModel = glm::inverse(matModel);
+    const glm::mat4 matInvModel = glm::inverse(matModelTR);
     glm::vec3 pointLightPosOnModel[8];
     for (int i = 0; i < 8; ++i) {
       pointLightPosOnModel[i] = matInvModel * glm::vec4(lights.point.position[i], 1);
@@ -337,8 +338,8 @@ void Program::Draw(const Mesh& mesh, const glm::vec3& t, const glm::vec3& r, con
 
   // モデル座標系におけるスポットライトの座標を計算し、GPUメモリに転送する.
   if (locSpotLightPos >= 0 && locSpotLightDir >= 0) {
-    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXYZ));
-    const glm::mat4 matInvModel = glm::inverse(matModel);
+    const glm::mat3 matInvRotate = glm::inverse(glm::mat3(matRotateXZY));
+    const glm::mat4 matInvModel = glm::inverse(matModelTR);
     glm::vec4 spotLightPosOnModel[4];
     glm::vec4 spotLightDirOnModel[4];
     for (int i = 0; i < 4; ++i) {
