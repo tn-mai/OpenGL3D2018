@@ -27,12 +27,12 @@ void PlayerActor::Update(float deltaTime)
 */
 void BulletActor::Update(float deltaTime)
 {
-  Actor::Update(deltaTime);
-  if (glm::any(glm::lessThan(position, glm::vec3(-20)))) {
-    health = 0;
-  } else if (glm::any(glm::greaterThanEqual(position, glm::vec3(20)))) {
-    health = 0;
+  for (size_t i = 0; i < 3; ++i) {
+    if (position[i] < -20 || position[i] > 20) {
+      health = 0;
+    }
   }
+  Actor::Update(deltaTime);
 }
 
 /**
@@ -40,7 +40,6 @@ void BulletActor::Update(float deltaTime)
 */
 void ZombieActor::Update(float deltaTime)
 {
-  Actor::Update(deltaTime);
   if (!target) {
     return;
   }
@@ -87,6 +86,7 @@ void ZombieActor::Update(float deltaTime)
       }
     }
   }
+  Actor::Update(deltaTime);
 }
 
 /**
@@ -251,7 +251,7 @@ void MainGameScene::ProcessInput()
 
       // ショットボタンが押されていなければ方向転換.
       if (!window.IsKeyPressed(GLFW_KEY_SPACE)) {
-        player.rotation.y = std::atan2(-player.velocity.z, player.velocity.x) - glm::pi<float>() / 2;
+        player.rotation.y = std::atan2(-player.velocity.z, player.velocity.x) - glm::radians(90.0f);
       }
       player.velocity *= speed;
     }
@@ -267,6 +267,8 @@ void MainGameScene::ProcessInput()
           bullet->velocity = matRotY * glm::vec4(0, 0, -40, 1);
         }
       }
+    } else {
+      playerBulletTimer = 0.0f;
     }
   } else if (state == State::stageClear) {
     player.velocity.x = player.velocity.z = 0;
@@ -378,31 +380,19 @@ void MainGameScene::Update()
   }
 
   // プレイヤーの弾と敵の衝突判定.
-  for (auto& bullet : playerBulletList) {
-    if (bullet->health <= 0) {
-      continue;
-    }
-    for (auto& zombie : enemyList) {
-      if (zombie->health <= 0) {
-        continue;
-      }
-      if (DetectCollision(*bullet, *zombie)) {
-        const CollisionTime t = FindCollisionTime(*bullet, *zombie, deltaTime);
-        if (t.time) {
-          zombie->health -= bullet->health;
-          bullet->health = 0;
-          if (zombie->health <= 0) {
-            score += 200;
-            ++enemyKilled;
-          } else {
-            score += 10;
-          }
-          break;
-        }
+  DetectCollision(playerBulletList, enemyList, [&](Actor& bullet, Actor& zombie) {
+    const CollisionTime t = FindCollisionTime(bullet, zombie, deltaTime);
+    if (t.time) {
+      zombie.health -= bullet.health;
+      bullet.health = 0;
+      if (zombie.health <= 0) {
+        score += 200;
+        ++enemyKilled;
+      } else {
+        score += 10;
       }
     }
-    bullet->position += bullet->velocity * deltaTime;
-  }
+  });
 
   // 敵をすべて倒したらステージクリア.
   if (enemyKilled == enemyTotal) {

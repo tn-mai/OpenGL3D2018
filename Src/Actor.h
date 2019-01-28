@@ -8,6 +8,7 @@
 #include "MeshList.h"
 #include <glm/vec3.hpp>
 #include <vector>
+#include <functional>
 
 /**
 * ’¼•û‘Ì.
@@ -51,7 +52,9 @@ void UpdateActorList(std::vector<Actor*>&, float);
 void RenderActorList(std::vector<Actor*>&, Shader::Program&, MeshList&);
 void ClearActorList(std::vector<Actor*>&);
 
+using CollsionHandlerType = std::function<void(Actor&, Actor&)>;
 bool DetectCollision(const Actor&, const Actor&);
+void DetectCollision(std::vector<Actor*>&, std::vector<Actor*>&, CollsionHandlerType);
 
 // Õ“Ë‚µ‚½–Ê(0=¶, 1=‰E, 2=‰º, 3=ã, 4=‰œ, 5=è‘O).
 enum class CollisionPlane

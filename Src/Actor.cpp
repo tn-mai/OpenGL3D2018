@@ -125,6 +125,33 @@ bool DetectCollision(const Actor& lhs, const Actor& rhs)
 }
 
 /**
+* 2つのグループ間で衝突判定を行う.
+*
+* @param va グループA.
+* @param vb グループB.
+* @param func A-B間の衝突を処理する関数. 
+*/
+void DetectCollision(std::vector<Actor*>& va, std::vector<Actor*>& vb, CollsionHandlerType func)
+{
+  for (auto& a : va) {
+    if (a->health <= 0) {
+      continue;
+    }
+    for (auto& b : vb) {
+      if (b->health <= 0) {
+        continue;
+      }
+      if (DetectCollision(*a, *b)) {
+        func(*a, *b);
+        if (a->health <= 0) {
+          break;
+        }
+      }
+    }
+  }
+}
+
+/**
 * 衝突するまでの経過時間を計算する.
 */
 CollisionTime FindCollisionTime(const Actor& a, const Actor& b, float deltaTime)
