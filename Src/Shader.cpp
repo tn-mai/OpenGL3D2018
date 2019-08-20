@@ -219,7 +219,7 @@ void Program::Reset(GLuint programId)
 */
 bool Program::IsNull() const
 {
-  return id;
+  return !id;
 }
 
 /**

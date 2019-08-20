@@ -166,7 +166,7 @@ void Image2D::Reset(GLuint texId)
 */
 bool Image2D::IsNull() const
 {
-  return id;
+  return !id;
 }
 
 /**
